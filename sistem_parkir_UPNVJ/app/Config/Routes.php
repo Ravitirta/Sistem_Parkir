@@ -5,4 +5,14 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-$routes->get('/', 'Home::index');
+// Rute Login (Bisa diakses siapa saja)
+$routes->get('/', 'Auth::index');
+$routes->post('/auth/loginProcess', 'Auth::loginProcess');
+$routes->get('/auth/logout', 'Auth::logout');
+
+// Rute Dashboard (Hanya bisa diakses jika sudah login)
+// Kita grupkan agar rapi dan semua kena filter 'auth'
+$routes->group('dashboard', ['filter' => 'auth'], function($routes) {
+    $routes->get('/', 'Dashboard::index');
+    // Nanti rute update, history, dll masuk sini
+});
