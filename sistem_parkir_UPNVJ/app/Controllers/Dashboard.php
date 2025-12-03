@@ -14,7 +14,7 @@ class Dashboard extends BaseController
         // 2. Siapkan Data
         $data = [
             'title'     => 'Transaksi Masuk',
-            'isi'       => 'dashboard/transaksi_masuk', // View konten
+            'isi'       => 'dashboard/transaksi_masuk', 
             'area'      => $areaModel->findAll(),       // Data untuk dropdown Area
             'kendaraan' => $kendaraanModel->findAll()   // Data untuk dropdown Jenis
         ];
