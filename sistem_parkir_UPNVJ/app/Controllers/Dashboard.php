@@ -41,31 +41,44 @@ class Dashboard extends BaseController
         return $prefix . str_pad($newNumber, 3, "0", STR_PAD_LEFT); 
     }
 
-    // --- LOGIKA SIMPAN MASUK ---
     public function simpanMasuk()
     {
         $transaksiModel = new TransaksiModel();
         $db = \Config\Database::connect();
+        $session = session(); // Panggil session
 
-        // Ambil Waktu Realtime
+        $plat_nomor = $this->request->getPost('plat_nomor');
+
+        // --- 1. CEK VALIDASI: APAKAH KENDARAAN MASIH ADA DI DALAM? ---
+        // Kita join tabel transaksi & pengguna untuk cek plat nomor yang belum "waktu_keluar" (masih NULL)
+        $cekDuplikat = $db->table('transaksi')
+                          ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna')
+                          ->where('pengguna.plat_nomor', $plat_nomor)
+                          ->where('transaksi.waktu_keluar', null) // Artinya masih parkir
+                          ->countAllResults();
+
+        if ($cekDuplikat > 0) {
+            // Jika ketemu, kirim pesan ERROR
+            $session->setFlashdata('gagal', 'Kendaraan dengan plat ' . $plat_nomor . ' masih ada di dalam area parkir!');
+            return redirect()->to('/dashboard');
+        }
+
+        // --- 2. JIKA LOLOS VALIDASI, LANJUT PROSES SIMPAN ---
+        
         $waktu_sekarang = date('H:i:s'); 
         $tanggal_sekarang = date('Y-m-d');
 
-        // 1. GENERATE ID TRANSAKSI BARU
+        // Generate ID Transaksi
         $id_transaksi_baru = $this->buatKodeOtomatis('transaksi', 'id_transaksi', 'TR_');
 
-        // 2. CEK PENGGUNA (LOGIKA PG_xxx)
-        $plat_nomor = $this->request->getPost('plat_nomor');
+        // Cek / Buat Pengguna
         $id_kendaraan = $this->request->getPost('id_kendaraan');
-        
         $cekPengguna = $db->table('pengguna')->where('plat_nomor', $plat_nomor)->get()->getRow();
 
         if ($cekPengguna) {
             $id_pengguna_fix = $cekPengguna->id_pengguna;
         } else {
             $id_pengguna_baru = $this->buatKodeOtomatis('pengguna', 'id_pengguna', 'PG_');
-            
-            // Insert Pengguna Baru
             $db->table('pengguna')->insert([
                 'id_pengguna'  => $id_pengguna_baru,
                 'plat_nomor'   => $plat_nomor,
@@ -74,7 +87,7 @@ class Dashboard extends BaseController
             $id_pengguna_fix = $id_pengguna_baru;
         }
 
-        // 3. SIAPKAN DATA TRANSAKSI
+        // Siapkan Data
         $data = [
             'id_transaksi'      => $id_transaksi_baru, 
             'tanggal_transaksi' => $tanggal_sekarang,
@@ -85,23 +98,20 @@ class Dashboard extends BaseController
             'id_kendaraan'      => $this->request->getPost('id_kendaraan'),
             'id_petugas'        => session()->get('id_petugas'), 
             'bayar'             => 0,
-            'status_transaksi'  => 'parkir',
+            'status_transaksi'  => 'masuk',
         ];
 
-        // 4. SIMPAN KE DATABASE TRANSAKSI
+        // Simpan Data
         $transaksiModel->insert($data);
 
-        // 5. UPDATE KAPASITAS & JAM DI STATUS AREA (REVISI DISINI)
+        // Update Kapasitas Area
         $id_area = $this->request->getPost('id_area');
-        
-        $sql = "UPDATE status_area 
-                SET kapasitas_now = kapasitas_now + 1, 
-                    jam = ? 
-                WHERE id_area = ?";
-                
+        $sql = "UPDATE status_area SET kapasitas_now = kapasitas_now + 1, jam = ? WHERE id_area = ?";
         $db->query($sql, [$waktu_sekarang, $id_area]);
 
-        // 6. Redirect kembali
+        // --- 3. SET PESAN BERHASIL ---
+        $session->setFlashdata('berhasil', 'Kendaraan berhasil masuk.');
+        
         return redirect()->to('/dashboard');
     }
 }

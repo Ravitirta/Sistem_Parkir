@@ -63,5 +63,30 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Cek apakah ada session 'berhasil' dari Controller
+        <?php if(session()->getFlashdata('berhasil')): ?>
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: '<?= session()->getFlashdata('berhasil'); ?>',
+                timer: 3000, // Otomatis tutup dalam 3 detik
+                showConfirmButton: false
+            });
+        <?php endif; ?>
+
+        // Cek apakah ada session 'gagal' dari Controller
+        <?php if(session()->getFlashdata('gagal')): ?>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Masuk!',
+                text: '<?= session()->getFlashdata('gagal'); ?>',
+            });
+        <?php endif; ?>
+    </script>
+
+
 </body>
 </html>
