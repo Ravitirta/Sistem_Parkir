@@ -8,14 +8,14 @@ class Dashboard extends BaseController
 {
     public function index()
     {
-        $areaModel = new AreaModel();
-        $kendaraanModel = new KendaraanModel();
+        $AreaModel = new AreaModel();
+        $KendaraanModel = new KendaraanModel();
 
         $data = [
             'title'     => 'Transaksi Masuk',
             'isi'       => 'dashboard/transaksi_masuk',
-            'area'      => $areaModel->findAll(),
-            'kendaraan' => $kendaraanModel->findAll()
+            'area'      => $AreaModel->findAll(),
+            'kendaraan' => $KendaraanModel->findAll()
         ];
 
         return view('layout/wrapper', $data);
@@ -41,30 +41,31 @@ class Dashboard extends BaseController
         return $prefix . str_pad($newNumber, 3, "0", STR_PAD_LEFT); 
     }
 
-    // --- LOGIKA SIMPAN YANG SUDAH DIPERBAIKI ---
+    // --- LOGIKA SIMPAN MASUK ---
     public function simpanMasuk()
     {
         $transaksiModel = new TransaksiModel();
         $db = \Config\Database::connect();
 
-        // 1. GENERATE ID TRANSAKSI BARU (TR_003)
+        // Ambil Waktu Realtime
+        $waktu_sekarang = date('H:i:s'); 
+        $tanggal_sekarang = date('Y-m-d');
+
+        // 1. GENERATE ID TRANSAKSI BARU
         $id_transaksi_baru = $this->buatKodeOtomatis('transaksi', 'id_transaksi', 'TR_');
 
-        // 2. CEK PENGGUNA (LOGIKA PG_003)
+        // 2. CEK PENGGUNA (LOGIKA PG_xxx)
         $plat_nomor = $this->request->getPost('plat_nomor');
         $id_kendaraan = $this->request->getPost('id_kendaraan');
         
-        // Cek apakah plat nomor ini sudah pernah ada?
         $cekPengguna = $db->table('pengguna')->where('plat_nomor', $plat_nomor)->get()->getRow();
 
         if ($cekPengguna) {
-            // Jika SUDAH ADA, pakai ID lama (misal PG_002)
             $id_pengguna_fix = $cekPengguna->id_pengguna;
         } else {
-            // Jika BELUM ADA, buat ID BARU (PG_003)
             $id_pengguna_baru = $this->buatKodeOtomatis('pengguna', 'id_pengguna', 'PG_');
             
-            // Insert ke tabel pengguna
+            // Insert Pengguna Baru
             $db->table('pengguna')->insert([
                 'id_pengguna'  => $id_pengguna_baru,
                 'plat_nomor'   => $plat_nomor,
@@ -75,24 +76,30 @@ class Dashboard extends BaseController
 
         // 3. SIAPKAN DATA TRANSAKSI
         $data = [
-            'id_transaksi'      => $id_transaksi_baru, // Pakai TR_003
-            'tanggal_transaksi' => date('Y-m-d'),      // Realtime Tanggal
-            'waktu_masuk'       => date('H:i:s'),      // Realtime Jam
+            'id_transaksi'      => $id_transaksi_baru, 
+            'tanggal_transaksi' => $tanggal_sekarang,
+            'waktu_masuk'       => $waktu_sekarang,
             'waktu_keluar'      => null,
             'id_area'           => $this->request->getPost('id_area'),
-            'id_pengguna'       => $id_pengguna_fix,   // Pakai PG_003
+            'id_pengguna'       => $id_pengguna_fix,
+            'id_kendaraan'      => $this->request->getPost('id_kendaraan'),
             'id_petugas'        => session()->get('id_petugas'), 
             'bayar'             => 0,
-            'status_transaksi'  => 'masuk', // Status Masuk
+            'status_transaksi'  => 'parkir',
         ];
 
         // 4. SIMPAN KE DATABASE TRANSAKSI
         $transaksiModel->insert($data);
 
-        // 5. UPDATE KAPASITAS AREA (+1)
-        // Query: UPDATE status_area SET kapasitas_now = kapasitas_now + 1 WHERE id_area = 'AR_001'
+        // 5. UPDATE KAPASITAS & JAM DI STATUS AREA (REVISI DISINI)
         $id_area = $this->request->getPost('id_area');
-        $db->query("UPDATE status_area SET kapasitas_now = kapasitas_now + 1 WHERE id_area = ?", [$id_area]);
+        
+        $sql = "UPDATE status_area 
+                SET kapasitas_now = kapasitas_now + 1, 
+                    jam = ? 
+                WHERE id_area = ?";
+                
+        $db->query($sql, [$waktu_sekarang, $id_area]);
 
         // 6. Redirect kembali
         return redirect()->to('/dashboard');
