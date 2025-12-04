@@ -14,5 +14,7 @@ $routes->get('/auth/logout', 'Auth::logout');
 // Kita grupkan agar rapi dan semua kena filter 'auth'
 $routes->group('dashboard', ['filter' => 'auth'], function($routes) {
     $routes->get('/', 'Dashboard::index');
-    // Nanti rute update, history, dll masuk sini
+    
+    // routes transaks kendaraan masuk
+    $routes->post('simpanMasuk', 'Dashboard::simpanMasuk');
 });
