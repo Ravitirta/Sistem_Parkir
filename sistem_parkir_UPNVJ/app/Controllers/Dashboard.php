@@ -8,8 +8,8 @@ class Dashboard extends BaseController
     public function index()
     {
         // 1. Panggil Model
-        $areaModel = new AreaModel();
-        $kendaraanModel = new KendaraanModel();
+        $AreaModel = new AreaModel();
+        $KendaraanModel = new KendaraanModel();
 
         // 2. Siapkan Data
         $data = [
