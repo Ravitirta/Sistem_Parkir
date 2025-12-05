@@ -18,7 +18,13 @@ $routes->group('dashboard', ['filter' => 'auth'], function($routes) {
     // routes transaks kendaraan masuk
     $routes->post('simpanMasuk', 'Dashboard::simpanMasuk');
 
-    // Tambahan untuk Fitur Cek Status
-    $routes->get('status', 'Status::index'); // Rute untuk menampilkan halaman Cek Status
-    // <<< END: Tambahan untuk Fitur Cek Status
+    // routes Cek Status
+    $routes->get('status', 'Status::index'); 
+
+    // >>> START: Tambahan untuk Fitur Update/Checkout
+    $routes->get('update', 'Update::index'); // Tampilan list/pencarian
+    // rute ini seharusnya POST
+    $routes->post('update/calculate/(:segment)', 'Update::calculate/$1'); // Hitung bayar
+    $routes->post('update/checkout/(:segment)', 'Update::checkout/$1'); // Update status selesai
+    // <<< END: Tambahan untuk Fitur Update/Checkout
 });

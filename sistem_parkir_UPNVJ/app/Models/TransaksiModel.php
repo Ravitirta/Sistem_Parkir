@@ -20,4 +20,7 @@ class TransaksiModel extends Model
         'bayar', 
         'status_transaksi'
     ];
+
+     protected $useAutoIncrement = false; 
+    protected $returnType = 'array';
 }

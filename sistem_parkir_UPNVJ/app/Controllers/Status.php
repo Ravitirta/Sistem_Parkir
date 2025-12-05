@@ -1,38 +1,27 @@
 <?php namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use App\Models\LogStatusModel;
+use App\Models\StatusAreaModel; 
 
 class Status extends BaseController
 {
-    /**
-     * Menampilkan halaman Cek Status Area Parkir.
-     */
     public function index()
     {
-        // Panggil Model yang sudah dibuat
-        $logStatusModel = new LogStatusModel();
+        $statusAreaModel = new StatusAreaModel();
         
-        // 1. Ambil data status dari database (sudah join dengan nama area)
-        $dataStatus = $logStatusModel->getStatusParkir();
+        // 1. Ambil data
+        $dataStatus = $statusAreaModel->getStatusUntukView();
         
-        // 2. Proses data: Menghitung status Penuh/Belum Penuh dan membatasi data
+        // 2. Proses data (Limit 7)
         $processedData = [];
-        // Batasi hanya 7 data terakhir dari semua log (sesuai ketentuan)
         $limit = 7; 
         $count = 0;
 
         foreach ($dataStatus as $item) {
-            if ($count >= $limit) {
-                // Berhenti jika sudah mencapai 7 data terakhir
-                break;
-            }
+            if ($count >= $limit) break;
 
-            // Hitung status Penuh/Belum Penuh
-            $statusArea = $logStatusModel->hitungStatus($item['kapasitas_now'], $item['kapasitas_max']);
-            
-            // Format waktu
-            $waktu = date('H:i:s', strtotime($item['timestamp']));
+            $statusArea = $statusAreaModel->hitungStatus($item['kapasitas_now'], $item['kapasitas_max']);
+            $waktu = date('H:i:s', strtotime($item['jam']));
             
             $processedData[] = [
                 'nama_area'     => $item['nama_area'],
@@ -44,15 +33,22 @@ class Status extends BaseController
             $count++;
         }
 
-        // Siapkan data yang akan dikirim ke View
+        // 3. Siapkan Data untuk Wrapper
         $data = [
-            'title' => 'Cek Status Area Parkir',
-            'statusParkir' => $processedData,
-            // Data session petugas mungkin diperlukan di layout utama (sidebar/header)
-            'petugas' => session()->get(), 
+            'title'        => 'Cek Status Area Parkir',
+            'petugas'      => session()->get(), 
+            
+            // --- PERBAIKAN PENTING DI SINI ---
+            // 'isi' HANYA BOLEH berisi nama file (String).
+            // JANGAN gunakan view() di sini.
+            'isi'          => 'status/index', 
+            
+            // Masukkan data statusParkir langsung ke array utama
+            // agar bisa dibaca oleh wrapper dan view index
+            'statusParkir' => $processedData 
         ];
 
-        // Tampilkan view
-        return view('status/index', $data);
+        // Tampilkan view menggunakan layout wrapper
+        return view('layout/wrapper', $data);
     }
 }
