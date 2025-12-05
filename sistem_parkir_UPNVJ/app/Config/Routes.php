@@ -17,4 +17,8 @@ $routes->group('dashboard', ['filter' => 'auth'], function($routes) {
     
     // routes transaks kendaraan masuk
     $routes->post('simpanMasuk', 'Dashboard::simpanMasuk');
+
+    // Tambahan untuk Fitur Cek Status
+    $routes->get('status', 'Status::index'); // Rute untuk menampilkan halaman Cek Status
+    // <<< END: Tambahan untuk Fitur Cek Status
 });
