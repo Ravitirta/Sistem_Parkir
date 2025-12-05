@@ -1,61 +1,88 @@
-<h2 class="text-2xl font-semibold mb-4 text-gray-800">Status Area Parkir UPNVJ</h2>
-<p class="text-sm text-gray-500 mb-6">Menampilkan 7 log status terakhir perbaruan kapasitas parkir.</p>
+<h2 class="mb-4">Monitor Status Area Parkir</h2>
 
-<div class="overflow-x-auto bg-white shadow-lg rounded-lg">
-    <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-blue-600 text-white">
-            <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Nama Area
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Status Area
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Jam Update
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Kapasitas Terisi
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">
-                    Kapasitas Maks
-                </th>
-            </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-            <?php if (empty($statusParkir)): ?>
-                <tr>
-                    <td colspan="5" class="px-6 py-4 whitespace-nowrap text-center text-sm text-gray-500">
-                        Tidak ada data status parkir yang tersedia.
-                    </td>
-                </tr>
-            <?php else: ?>
-                <?php foreach ($statusParkir as $status): ?>
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title text-muted">Realtime Updates</h5>
+            <a href="" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-arrow-clockwise"></i> Refresh Data
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                     <tr>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            <?= esc($status['nama_area']) ?>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <?php 
-                                $badgeColor = ($status['status_area'] == 'Penuh') ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800';
-                            ?>
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?= $badgeColor ?>">
-                                <?= esc($status['status_area']) ?>
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <?= esc($status['jam']) ?>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <?= esc($status['kapasitas_now']) ?>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            <?= esc($status['kapasitas_max']) ?>
-                        </td>
+                        <th scope="col">Nama Area</th>
+                        <th scope="col" class="text-center">Jam Update</th>
+                        <th scope="col">Kapasitas (Terisi / Max)</th>
+                        <th scope="col">Visualisasi</th>
+                        <th scope="col" class="text-center">Status</th>
                     </tr>
-                <?php endforeach; ?>
-            <?php endif; ?>
-        </tbody>
-    </table>
-</div>
+                </thead>
+                <tbody>
+                    <?php if(empty($statusParkir)): ?>
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">Belum ada data status area.</td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach($statusParkir as $row): ?>
+                            <?php 
+                                // Hitung Persentase untuk Progress Bar
+                                if($row['kapasitas_max'] > 0){
+                                    $persen = ($row['kapasitas_now'] / $row['kapasitas_max']) * 100;
+                                } else {
+                                    $persen = 0;
+                                }
 
+                                // Tentukan Warna Progress Bar
+                                if($persen >= 90) { $warna = 'bg-danger'; }      // Merah (Kritis)
+                                elseif($persen >= 70) { $warna = 'bg-warning'; } // Kuning (Hampir Penuh)
+                                else { $warna = 'bg-success'; }                  // Hijau (Aman)
+                                
+                                // Tentukan Badge Status
+                                $badgeColor = ($row['status_area'] == 'Penuh') ? 'bg-danger' : 'bg-success';
+                            ?>
+                            <tr>
+                                <td class="fw-bold"><?= esc($row['nama_area']); ?></td>
+                                
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border">
+                                        <?= esc($row['jam']); ?> WIB
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="fw-bold"><?= esc($row['kapasitas_now']); ?></span> 
+                                    <span class="text-muted small">/ <?= esc($row['kapasitas_max']); ?></span>
+                                </td>
+
+                                <td style="width: 30%;">
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar <?= $warna ?>" 
+                                             role="progressbar" 
+                                             style="width: <?= $persen ?>%;" 
+                                             aria-valuenow="<?= $persen ?>" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted" style="font-size: 0.75rem;">
+                                        <?= number_format($persen, 1) ?>% Terisi
+                                    </small>
+                                </td>
+
+                                <td class="text-center">
+                                    <span class="badge <?= $badgeColor ?> rounded-pill px-3">
+                                        <?= esc($row['status_area']); ?>
+                                    </span>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

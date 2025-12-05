@@ -94,7 +94,6 @@ class Dashboard extends BaseController
                 'id_pengguna'  => $id_pengguna_baru,
                 'plat_nomor'   => $plat_nomor,
                 'id_kendaraan' => $id_kendaraan,
-                'merk'         => '-' // Default merk jika tidak diinput
             ]);
             $id_pengguna_fix = $id_pengguna_baru;
         }
@@ -115,35 +114,27 @@ class Dashboard extends BaseController
 
         $transaksiModel->insert($dataTransaksi);
 
+
+
         // --- 4. UPDATE LOG STATUS & HISTORY AREA ---
         
-        // Ambil status terakhir dari area ini untuk mendapatkan kapasitas maksimal & saat ini
-        $lastStatus = $statusAreaModel->where('id_area', $id_area)
-                                      ->orderBy('jam', 'DESC')
-                                      ->first();
+        // --- REVISI LANGKAH 5 (PASTIKAN KODENYA SEPERTI INI) ---
+        // Masalahmu terjadi karena kode di sini mencoba 'insert' data baru.
+        // Kita harus paksa pakai SQL 'UPDATE' agar dia hanya mengedit data yang sudah ada.
         
-        // Set nilai default jika data belum ada
-        $currentCap = $lastStatus ? $lastStatus['kapasitas_now'] : 0;
-        $maxCap = $lastStatus ? $lastStatus['kapasitas_max'] : 100; // Default max 100 jika database kosong
-
-        // Tambah kapasitas +1
-        $newCap = $currentCap + 1;
-
-        // INSERT Log Baru ke status_area (Bukan Update, agar tercatat di history 7 data)
-        $statusAreaModel->insert([
-            'id_area'       => $id_area,
-            'kapasitas_now' => $newCap,
-            'kapasitas_max' => $maxCap,
-            'jam'           => $waktu_sekarang,
-            'status'        => $statusAreaModel->hitungStatus($newCap, $maxCap)
-        ]);
-
-        // Hapus log lama jika lebih dari 7 baris (Pembersihan Otomatis)
-        $statusAreaModel->cleanOldLogs($id_area);
-
-        // --- 5. SELESAI ---
-        $session->setFlashdata('berhasil', 'Kendaraan berhasil masuk. ID Transaksi: ' . $id_transaksi_baru);
+        $id_area = $this->request->getPost('id_area');
         
+        // Query SQL Manual agar 100% aman
+        $sql = "UPDATE status_area 
+                SET kapasitas_now = kapasitas_now + 1, 
+                    jam = ? 
+                WHERE id_area = ?";
+                
+        // Eksekusi Query
+        $db->query($sql, [$waktu_sekarang, $id_area]);
+
+        // 6. Redirect kembali
+        $session->setFlashdata('berhasil', 'Kendaraan berhasil masuk.');
         return redirect()->to('/dashboard');
     }
 }
