@@ -93,4 +93,35 @@ class Pelanggaran extends BaseController
         
         return redirect()->to('/pelanggaran/manage')->with('sukses', $pesan);
     }
+
+    // 6. FUNGSI HAPUS (Hapus Data Database & File Gambar)
+    public function hapus($id)
+    {
+        // Security: Cek Login
+        if(!session()->get('logged_in')){ 
+            return redirect()->to('/auth'); 
+        }
+
+        $model = new PelanggaranModel();
+        
+        // A. Cari data laporan berdasarkan ID dulu
+        $laporan = $model->find($id);
+
+        if ($laporan) {
+            // B. Hapus File Gambar Fisik di folder 'uploads'
+            // Kita cek dulu apakah filenya ada agar tidak error
+            $pathGambar = 'uploads/' . $laporan['foto'];
+            
+            if (file_exists($pathGambar)) {
+                unlink($pathGambar); // 'unlink' adalah perintah PHP untuk menghapus file dari harddisk
+            }
+
+            // C. Hapus Data di Database
+            $model->delete($id);
+            
+            return redirect()->to('/pelanggaran')->with('sukses', 'Laporan dan foto berhasil dihapus permanen.');
+        } else {
+            return redirect()->to('/pelanggaran')->with('gagal', 'Data tidak ditemukan.');
+        }
+    }
 }

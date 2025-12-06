@@ -45,11 +45,11 @@ $routes->post('/pelanggaran/simpanLaporan', 'Pelanggaran::simpanLaporan'); // Pr
 // B. Rute Admin/Petugas (Hanya bisa diakses jika sudah Login)
 // Kita bungkus dalam grup 'pelanggaran' dengan filter 'auth'
 $routes->group('pelanggaran', ['filter' => 'auth'], function($routes) {
-    
-    // Halaman kelola laporan masuk (Pending)
+
+    // rute manage
     $routes->get('manage', 'Pelanggaran::manage'); 
-    
-    // Proses verifikasi (Terima/Tolak)
-    // (:num) menangkap ID, (:segment) menangkap status 'valid'/'invalid'
     $routes->get('verifikasi/(:num)/(:segment)', 'Pelanggaran::verifikasi/$1/$2');
+
+    // Rute Hapus
+    $routes->get('hapus/(:num)', 'Pelanggaran::hapus/$1');
 });
