@@ -100,6 +100,10 @@
                 <a class="nav-link <?= ($title == 'Kendaraan Keluar (Update)') ? 'active' : '' ?>" href="/dashboard/update">
                     <i class="bi bi-box-arrow-left"></i> Keluar & Bayar
                 </a>
+                
+                <a class="nav-link <?= ($title == 'Transaksi Keluar') ? 'active' : '' ?>" href="/dashboard/transaksiKeluar">
+                    <i class="bi bi-cart-dash-fill"></i> Transaksi Keluar
+                </a>
                 <a class="nav-link <?= ($title == 'Cek Status Area Parkir') ? 'active' : '' ?>" href="/dashboard/status">
                     <i class="bi bi-grid-3x3-gap-fill"></i> Cek Status
                 </a>
@@ -151,4 +155,5 @@
 </script>
 
 </body>
+
 </html>
