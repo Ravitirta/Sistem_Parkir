@@ -10,7 +10,7 @@ class TransaksiKeluar extends BaseController
     {
         $data = [
             'title' => 'Transaksi Keluar',
-            'isi'   => 'transaksi_keluar/form', 
+            'isi'   => 'form', 
             'petugas' => session()->get() 
         ];
 
