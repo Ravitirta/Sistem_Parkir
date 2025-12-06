@@ -107,6 +107,11 @@
                 <a class="nav-link <?= ($title == 'Cek Status Area Parkir') ? 'active' : '' ?>" href="/dashboard/status">
                     <i class="bi bi-grid-3x3-gap-fill"></i> Cek Status
                 </a>
+
+                <a class="nav-link <?= ($title == 'Laporan Pelanggaran' || $title == 'Input Laporan' || $title == 'Verifikasi Laporan') ? 'active' : '' ?>" href="/pelanggaran">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Pelanggaran
+                </a>
+                
                 <a class="nav-link <?= ($title == 'Laporan Harian' || $title == 'Laporan Bulanan') ? 'active' : '' ?>" href="/dashboard/laporan">
                     <i class="bi bi-file-earmark-bar-graph"></i> Laporan
                 </a>
@@ -157,3 +162,4 @@
 </body>
 
 </html>
+
