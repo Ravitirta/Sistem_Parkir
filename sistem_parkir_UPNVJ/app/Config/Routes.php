@@ -27,4 +27,9 @@ $routes->group('dashboard', ['filter' => 'auth'], function($routes) {
     $routes->post('update/calculate/(:segment)', 'Update::calculate/$1'); // Hitung bayar
     $routes->post('update/checkout/(:segment)', 'Update::checkout/$1'); // Update status selesai
     // <<< END: Tambahan untuk Fitur Update/Checkout
+
+    // >>> Fitur Transaksi Keluar
+    $routes->get('transaksiKeluar', 'TransaksiKeluar::index'); 
+    $routes->post('transaksiKeluar/simpanKeluar', 'TransaksiKeluar::simpanKeluar');
+    // <<< END: Fitur Transaksi Keluar
 });
