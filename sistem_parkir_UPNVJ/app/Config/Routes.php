@@ -33,3 +33,23 @@ $routes->group('dashboard', ['filter' => 'auth'], function($routes) {
     $routes->post('transaksiKeluar/simpanKeluar', 'TransaksiKeluar::simpanKeluar');
     // <<< END: Fitur Transaksi Keluar
 });
+
+// 3. FITUR PELANGGARAN (PUBLIC & PRIVATE)
+// --------------------------------------------------------------------
+
+// A. Rute Public (Bisa diakses Orang Umum tanpa Login)
+$routes->get('/pelanggaran', 'Pelanggaran::index');           // Lihat daftar valid
+$routes->get('/pelanggaran/lapor', 'Pelanggaran::lapor');     // Form upload
+$routes->post('/pelanggaran/simpanLaporan', 'Pelanggaran::simpanLaporan'); // Proses upload
+
+// B. Rute Admin/Petugas (Hanya bisa diakses jika sudah Login)
+// Kita bungkus dalam grup 'pelanggaran' dengan filter 'auth'
+$routes->group('pelanggaran', ['filter' => 'auth'], function($routes) {
+    
+    // Halaman kelola laporan masuk (Pending)
+    $routes->get('manage', 'Pelanggaran::manage'); 
+    
+    // Proses verifikasi (Terima/Tolak)
+    // (:num) menangkap ID, (:segment) menangkap status 'valid'/'invalid'
+    $routes->get('verifikasi/(:num)/(:segment)', 'Pelanggaran::verifikasi/$1/$2');
+});
