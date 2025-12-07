@@ -19,18 +19,13 @@ class Auth extends BaseController
         $session = session();
         $model = new PetugasModel();
         
-        // Ambil input dari form
         $username = $this->request->getVar('username');
         $password = $this->request->getVar('password');
         
-        // Cari data berdasarkan username
         $data = $model->where('username', $username)->first();
         
         if($data){
-            // Cek Password
-            if($data['password'] == $password){
-                
-                // Set Session Data
+            if($data['password'] == $password){ // Nanti ganti password_verify jika sudah hash
                 $ses_data = [
                     'id_petugas' => $data['id_petugas'],
                     'nama'       => $data['nama'],
@@ -39,15 +34,13 @@ class Auth extends BaseController
                 ];
                 $session->set($ses_data);
                 
-                return redirect()->to('/dashboard');
-            }else{
-                $session->setFlashdata('msg', 'Password Salah');
-                return redirect()->to('/');
+                // SUKSES: Kirim flashdata 'login_sukses'
+                return redirect()->to('/dashboard')->with('login_sukses', 'Selamat Datang, ' . $data['nama']);
             }
-        }else{
-            $session->setFlashdata('msg', 'Username tidak ditemukan');
-            return redirect()->to('/');
         }
+        
+        // GAGAL: Kembalikan ke halaman sebelumnya (Status/Index) dengan pesan error
+        return redirect()->back()->with('login_gagal', 'Username atau Password Salah!');
     }
 
     public function logout()
