@@ -11,8 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Google Fonts: Poppins -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-
-    <style>
+<style>
         /* --- GLOBAL STYLE --- */
         body { 
             background-color: #f3f4f6; 
@@ -25,32 +24,39 @@
             background: #1e293b; 
             min-height: 100vh; 
             color: white; 
-            padding-top: 30px;
+            padding-top: 25px; /* Jarak atas sedikit dikurangi */
             border-right: 1px solid rgba(255,255,255,0.05);
         }
         
         .sidebar h4 { 
             font-weight: 600; 
             padding-left: 20px; 
-            margin-bottom: 5px; 
+            margin-bottom: 15px; 
             font-size: 1.2rem; 
+            color: white;
         }
         
-        .sidebar p { 
-            padding-left: 20px; 
+        /* BOX PROFIL (PERBAIKAN JARAK) */
+        .profile-box {
+            padding: 10px 20px;
+            margin-bottom: 10px; /* Jarak ke menu diperkecil (sebelumnya 40px) */
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .profile-box p {
             color: #94a3b8; 
             font-size: 0.85em; 
-            margin-bottom: 40px; 
+            margin: 0; /* Hilangkan margin default paragraf */
         }
         
         /* --- MENU LINK STYLE --- */
         .nav-link { 
             color: #cbd5e1; 
-            padding: 12px 25px; 
+            padding: 10px 25px; /* Padding sedikit diperkecil agar lebih padat */
             display: flex; 
             align-items: center; 
             gap: 12px;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
         }
         
         .nav-link:hover { 
@@ -64,6 +70,18 @@
             color: #38bdf8; 
             border-left: 4px solid #38bdf8; 
             font-weight: 500;
+        }
+
+        /* LABEL PEMISAH MENU (PERBAIKAN JARAK) */
+        .menu-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #64748b;
+            margin-top: 15px;    /* Jarak antar kelompok menu diatur disini */
+            margin-bottom: 5px;
+            padding-left: 25px;
+            font-weight: 600;
         }
 
         /* --- BUTTON STYLE --- */
@@ -81,7 +99,6 @@
         .login-btn:hover { 
             background-color: #2563eb; 
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
         }
 
         .content-area { padding: 40px; }
@@ -94,62 +111,65 @@
         
         <!-- BAGIAN 1: SIDEBAR -->
         <div class="col-md-2 sidebar d-flex flex-column px-0">
+            <!-- JUDUL -->
             <h4><i class="bi bi-p-square-fill text-primary me-2"></i>Parkir UPNVJ</h4>
             
-            <!-- TAMPILAN STATUS USER -->
-            <?php if(session()->get('logged_in')): ?>
-                <p><i class="bi bi-person-badge"></i> Petugas: <?= session()->get('nama'); ?></p>
-            <?php else: ?>
-                <p><i class="bi bi-info-circle"></i> Mode: Informasi Publik</p>
-            <?php endif; ?>
+            <!-- PROFIL / INFO LOGIN (Desain Baru Lebih Rapat) -->
+            <div class="profile-box">
+                <?php if(session()->get('logged_in')): ?>
+                    <p><i class="bi bi-person-badge text-success me-1"></i> <?= session()->get('nama'); ?> (Petugas)</p>
+                <?php else: ?>
+                    <p><i class="bi bi-globe text-info me-1"></i> Akses Publik</p>
+                <?php endif; ?>
+            </div>
 
             <nav class="nav flex-column">
                 
-                <!-- MENU 1: KHUSUS PETUGAS (Hanya Tampil Jika Login) -->
+                <!-- MENU 1: KHUSUS PETUGAS -->
                 <?php if(session()->get('logged_in')): ?>
-                    <div class="small text-muted px-4 mb-2 mt-2">TRANSAKSI</div>
+                    <div class="menu-label">TRANSAKSI</div>
                     
                     <a class="nav-link <?= ($title == 'Transaksi Masuk') ? 'active' : '' ?>" href="/dashboard">
-                        <i class="bi bi-box-arrow-in-right"></i> Transaksi Masuk
+                        <i class="bi bi-box-arrow-in-right"></i> Masuk
                     </a>
                     <a class="nav-link <?= ($title == 'Kendaraan Keluar (Update)') ? 'active' : '' ?>" href="/dashboard/update">
                         <i class="bi bi-box-arrow-left"></i> Keluar & Bayar
                     </a>
                     <a class="nav-link <?= ($title == 'Transaksi Keluar') ? 'active' : '' ?>" href="/dashboard/transaksiKeluar">
-                        <i class="bi bi-cart-dash-fill"></i> Transaksi Keluar
+                        <i class="bi bi-cart-dash-fill"></i> Data Keluar
                     </a>
                 <?php endif; ?>
 
-                <!-- MENU 2: PUBLIK (Selalu Tampil) -->
-                <div class="small text-muted px-4 mb-2 mt-3">INFORMASI</div>
+                <!-- MENU 2: PUBLIK (Jarak diatur oleh .menu-label) -->
+                <div class="menu-label">INFORMASI AREA</div>
 
                 <a class="nav-link <?= ($title == 'Cek Status Area Parkir') ? 'active' : '' ?>" href="/dashboard/status">
-                    <i class="bi bi-grid-3x3-gap-fill"></i> Cek Status Area
+                    <i class="bi bi-grid-3x3-gap-fill"></i> Cek Status
                 </a>
                 
                 <a class="nav-link <?= ($title == 'Laporan Pelanggaran' || $title == 'Input Laporan' || $title == 'Verifikasi Laporan') ? 'active' : '' ?>" href="/pelanggaran">
-                    <i class="bi bi-exclamation-triangle-fill"></i> Laporan Pelanggaran
+                    <i class="bi bi-exclamation-triangle-fill"></i> Pelanggaran
                 </a>
 
-                <!-- MENU 3: LAPORAN (Khusus Petugas) -->
+                <!-- MENU 3: DATA (Khusus Petugas) -->
                 <?php if(session()->get('logged_in')): ?>
-                    <div class="small text-muted px-4 mb-2 mt-3">DATA</div>
+                    <div class="menu-label">REKAP DATA</div>
                     
                     <a class="nav-link <?= ($title == 'Laporan Harian' || $title == 'Laporan Bulanan') ? 'active' : '' ?>" href="/dashboard/laporan">
                         <i class="bi bi-file-earmark-bar-graph"></i> Laporan
                     </a>
                     <a class="nav-link <?= ($title == 'History') ? 'active' : '' ?>" href="/dashboard/history">
-                        <i class="bi bi-clock-history"></i> History
+                        <i class="bi bi-clock-history"></i> Riwayat
                     </a>
                     
                     <!-- TOMBOL LOGOUT -->
                     <a class="nav-link logout-link" href="/auth/logout">
-                        <i class="bi bi-power"></i> Logout Sistem
+                        <i class="bi bi-power"></i> Logout
                     </a>
                 <?php else: ?>
-                    <!-- TOMBOL LOGIN (POP UP) -->
-                    <a class="nav-link login-btn mt-5" href="javascript:void(0)" onclick="tampilkanLogin()">
-                        <i class="bi bi-box-arrow-in-right"></i> Login Petugas
+                    <!-- TOMBOL LOGIN -->
+                    <a class="nav-link login-btn mt-4" href="javascript:void(0)" onclick="tampilkanLogin()">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Login Petugas
                     </a>
                 <?php endif; ?>
 
@@ -169,75 +189,49 @@
 
 <!-- SCRIPT LOGIKA JAVASCRIPT -->
 <script>
-    // 1. Fungsi Menampilkan Pop-up Login
+    // 1. Fungsi Pop-up Login
     function tampilkanLogin() {
         Swal.fire({
-            title: 'Login Petugas Parkir',
+            title: 'Login Petugas',
             html: `
                 <form id="formLogin" action="/auth/loginProcess" method="POST">
                     <div class="mb-3 text-start">
                         <label class="form-label fw-bold">Username</label>
-                        <input type="text" name="username" class="form-control" placeholder="Masukkan username petugas" required>
+                        <input type="text" name="username" class="form-control" required>
                     </div>
                     <div class="mb-3 text-start">
                         <label class="form-label fw-bold">Password</label>
-                        <input type="password" name="password" class="form-control" placeholder="Masukkan password" required>
+                        <input type="password" name="password" class="form-control" required>
                     </div>
                 </form>
             `,
-            icon: 'info',
             showCancelButton: true,
-            confirmButtonText: 'Masuk Sistem',
+            confirmButtonText: 'Masuk',
             confirmButtonColor: '#3b82f6',
             cancelButtonText: 'Batal',
-            focusConfirm: false,
             preConfirm: () => {
-                // Submit form secara otomatis saat tombol diklik
-                const form = document.getElementById('formLogin');
-                form.submit();
+                document.getElementById('formLogin').submit();
             }
         });
     }
 
-    // 2. Notifikasi Login Sukses/Gagal (Dari Controller Auth)
+    // 2. Notifikasi
     <?php if(session()->getFlashdata('login_sukses')): ?>
-        Swal.fire({
-            icon: 'success',
-            title: 'Login Berhasil!',
-            text: '<?= session()->getFlashdata('login_sukses'); ?>',
-            timer: 2000,
-            showConfirmButton: false
-        });
+        Swal.fire({ icon: 'success', title: 'Login Berhasil!', text: '<?= session()->getFlashdata('login_sukses'); ?>', timer: 2000, showConfirmButton: false });
     <?php endif; ?>
 
     <?php if(session()->getFlashdata('login_gagal')): ?>
-        Swal.fire({
-            icon: 'error',
-            title: 'Login Gagal',
-            text: '<?= session()->getFlashdata('login_gagal'); ?>',
-        });
+        Swal.fire({ icon: 'error', title: 'Login Gagal', text: '<?= session()->getFlashdata('login_gagal'); ?>' });
     <?php endif; ?>
 
-    // 3. Notifikasi Fitur Lain (Transaksi, Pelanggaran, dll)
     <?php if(session()->getFlashdata('berhasil') || session()->getFlashdata('sukses')): ?>
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '<?= session()->getFlashdata('berhasil') ?? session()->getFlashdata('sukses'); ?>',
-            timer: 3000,
-            showConfirmButton: false
-        });
+        Swal.fire({ icon: 'success', title: 'Berhasil!', text: '<?= session()->getFlashdata('berhasil') ?? session()->getFlashdata('sukses'); ?>', timer: 3000, showConfirmButton: false });
     <?php endif; ?>
 
     <?php if(session()->getFlashdata('gagal')): ?>
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: '<?= session()->getFlashdata('gagal'); ?>',
-        });
+        Swal.fire({ icon: 'error', title: 'Gagal!', text: '<?= session()->getFlashdata('gagal'); ?>' });
     <?php endif; ?>
 </script>
 
 </body>
 </html>
-
