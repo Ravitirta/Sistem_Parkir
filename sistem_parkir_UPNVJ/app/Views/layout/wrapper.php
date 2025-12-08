@@ -135,9 +135,7 @@
                     <a class="nav-link <?= ($title == 'Kendaraan Keluar (Update)') ? 'active' : '' ?>" href="/dashboard/update">
                         <i class="bi bi-box-arrow-left"></i> Keluar & Bayar
                     </a>
-                    <a class="nav-link <?= ($title == 'Transaksi Keluar') ? 'active' : '' ?>" href="/dashboard/transaksiKeluar">
-                        <i class="bi bi-cart-dash-fill"></i> Data Keluar
-                    </a>
+                    
                 <?php endif; ?>
 
                 <!-- MENU 2: PUBLIK (Jarak diatur oleh .menu-label) -->
@@ -235,3 +233,4 @@
 
 </body>
 </html>
+
