@@ -16,7 +16,7 @@ class TransaksiModel extends Model
         'no_polisi', 
         'jenis_kendaraan', 
         'tgl_masuk', 
-        'tgl_keluar', 
+        'tanggal_generate', 
         'biaya', 
         'status_transaksi', 
         'keterangan'
@@ -35,7 +35,7 @@ class TransaksiModel extends Model
     {
         // Query: "Ambil semua data dimana status_transaksi 'selesai' DAN tanggal keluar adalah hari ini"
         return $this->where('status_transaksi', 'selesai')
-                    ->where('DATE(tgl_keluar)', date('Y-m-d'))
+                    ->where('DATE(tanggal_generate)', date('Y-m-d'))
                     ->findAll();
     }
 
@@ -44,8 +44,8 @@ class TransaksiModel extends Model
     {
         // Query: "Ambil semua data dimana status_transaksi 'selesai' DAN bulan keluar adalah bulan ini"
         return $this->where('status_transaksi', 'selesai')
-                    ->where('MONTH(tgl_keluar)', date('m'))
-                    ->where('YEAR(tgl_keluar)', date('Y'))
+                    ->where('MONTH(tanggal_generate)', date('m'))
+                    ->where('YEAR(tanggal_generate)', date('Y'))
                     ->findAll();
     }
 
@@ -55,8 +55,8 @@ class TransaksiModel extends Model
         // Query: "Jumlahkan kolom 'biaya' pada bulan ini"
         $query = $this->selectSum('biaya')
                       ->where('status_transaksi', 'selesai')
-                      ->where('MONTH(tgl_keluar)', date('m'))
-                      ->where('YEAR(tgl_keluar)', date('Y'))
+                      ->where('MONTH(tanggal_generate)', date('m'))
+                      ->where('YEAR(tanggal_generate)', date('Y'))
                       ->first();
 
         // Kembalikan angkanya. Kalau kosong (belum ada transaksi), kembalikan 0.
