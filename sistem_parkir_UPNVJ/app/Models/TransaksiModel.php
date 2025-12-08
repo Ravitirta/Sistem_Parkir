@@ -1,65 +1,67 @@
-<?php
-
-namespace App\Models;
+<?php namespace App\Models;
 
 use CodeIgniter\Model;
 
 class TransaksiModel extends Model
 {
-    // --- KONFIGURASI TABEL ---
-    protected $table            = 'transaksi'; // <!- PASTIKAN INI SAMA DENGAN NAMA TABEL DI PHP MYADMIN
-    protected $primaryKey       = 'id';
-    protected $useAutoIncrement = true;
+    // --- KONFIGURASI TABEL SESUAI GAMBAR DATABASE ---
+    protected $table      = 'transaksi';      
+    protected $primaryKey = 'id_transaksi';   
+    protected $useAutoIncrement = false;
     
-    // Kolom apa saja yang boleh diisi/diubah
-    protected $allowedFields    = [
-        'no_polisi', 
-        'jenis_kendaraan', 
-        'tgl_masuk', 
-        'tanggal_generate', 
-        'biaya', 
-        'status_transaksi', 
-        'keterangan'
+    // Daftar kolom sesuai gambar Tabel Transaksi kamu
+    protected $allowedFields = [
+        'id_transaksi', 
+        'tanggal_transaksi', 
+        'waktu_masuk', 
+        'waktu_keluar', 
+        'id_area', 
+        'id_pengguna',
+        'id_kendaraan',  
+        'id_petugas', 
+        'bayar', 
+        'status_transaksi' 
     ];
 
-    // Menggunakan timestamps otomatis (created_at, updated_at)
-    // Kalau di tabel tidak ada kolom created_at, set ini jadi false
-    protected $useTimestamps = false; 
-
     // =================================================================
-    // METHOD KHUSUS UNTUK LAPORAN (DIPANGGIL DI CONTROLLER)
+    // METHOD KHUSUS UNTUK LAPORAN
     // =================================================================
 
-    // 1. Ambil data transaksi yang selesai/keluar HARI INI
+    // 1. Ambil data transaksi yang selesai HARI INI
     public function getLaporanHarian()
     {
-        // Query: "Ambil semua data dimana status_transaksi 'selesai' DAN tanggal keluar adalah hari ini"
-        return $this->where('status_transaksi', 'selesai')
-                    ->where('DATE(tanggal_generate)', date('Y-m-d'))
+        // Kita JOIN ke tabel pengguna & area agar data lengkap
+        return $this->select('transaksi.*, pengguna.plat_nomor, area_parkir.nama_area')
+                    ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna', 'left')
+                    ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
+                    ->where('status_transaksi', 'selesai')
+                    ->where('tanggal_transaksi', date('Y-m-d')) // Cek tanggal hari ini
+                    ->orderBy('waktu_keluar', 'DESC')
                     ->findAll();
     }
 
-    // 2. Ambil data transaksi yang selesai/keluar BULAN INI
+    // 2. Ambil Rekap Pendapatan Per Area BULAN INI
     public function getLaporanBulanan()
     {
-        // Query: "Ambil semua data dimana status_transaksi 'selesai' DAN bulan keluar adalah bulan ini"
-        return $this->where('status_transaksi', 'selesai')
-                    ->where('MONTH(tanggal_generate)', date('m'))
-                    ->where('YEAR(tanggal_generate)', date('Y'))
+        // Menghitung total 'bayar' dikelompokkan berdasarkan area
+        return $this->select('area_parkir.nama_area, transaksi.tanggal_transaksi, SUM(transaksi.bayar) as pendapatan_per_area')
+                    ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
+                    ->where('status_transaksi', 'selesai')
+                    ->where('MONTH(tanggal_transaksi)', date('m'))
+                    ->where('YEAR(tanggal_transaksi)', date('Y'))
+                    ->groupBy('transaksi.id_area') 
                     ->findAll();
     }
 
     // 3. Hitung TOTAL UANG (Pendapatan) BULAN INI
     public function getTotalPendapatanBulanIni()
     {
-        // Query: "Jumlahkan kolom 'biaya' pada bulan ini"
-        $query = $this->selectSum('biaya')
+        $query = $this->selectSum('bayar') // Nama kolom di DB kamu 'bayar' bukan 'biaya'
                       ->where('status_transaksi', 'selesai')
-                      ->where('MONTH(tanggal_generate)', date('m'))
-                      ->where('YEAR(tanggal_generate)', date('Y'))
+                      ->where('MONTH(tanggal_transaksi)', date('m'))
+                      ->where('YEAR(tanggal_transaksi)', date('Y'))
                       ->first();
 
-        // Kembalikan angkanya. Kalau kosong (belum ada transaksi), kembalikan 0.
-        return $query['biaya'] ?? 0; 
+        return $query['bayar'] ?? 0; 
     }
 }
