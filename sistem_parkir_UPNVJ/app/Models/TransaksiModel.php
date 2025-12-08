@@ -1,26 +1,65 @@
-<?php namespace App\Models;
+<?php
+
+namespace App\Models;
 
 use CodeIgniter\Model;
 
 class TransaksiModel extends Model
 {
-    protected $table      = 'transaksi';      // Nama tabel di database
-    protected $primaryKey = 'id_transaksi';   // Primary Key
-
-    // Daftar kolom yang BOLEH diisi oleh sistem (Security)
-    protected $allowedFields = [
-        'id_transaksi', 
-        'tanggal_transaksi', 
-        'waktu_masuk', 
-        'waktu_keluar', 
-        'id_area', 
-        'id_pengguna', 
-        'id_kendaraan',
-        'id_petugas', 
-        'bayar', 
-        'status_transaksi'
+    // --- KONFIGURASI TABEL ---
+    protected $table            = 'transaksi'; // <!- PASTIKAN INI SAMA DENGAN NAMA TABEL DI PHP MYADMIN
+    protected $primaryKey       = 'id';
+    protected $useAutoIncrement = true;
+    
+    // Kolom apa saja yang boleh diisi/diubah
+    protected $allowedFields    = [
+        'no_polisi', 
+        'jenis_kendaraan', 
+        'tgl_masuk', 
+        'tgl_keluar', 
+        'biaya', 
+        'status', 
+        'keterangan'
     ];
 
-     protected $useAutoIncrement = false; 
-    protected $returnType = 'array';
+    // Menggunakan timestamps otomatis (created_at, updated_at)
+    // Kalau di tabel tidak ada kolom created_at, set ini jadi false
+    protected $useTimestamps = false; 
+
+    // =================================================================
+    // METHOD KHUSUS UNTUK LAPORAN (DIPANGGIL DI CONTROLLER)
+    // =================================================================
+
+    // 1. Ambil data transaksi yang selesai/keluar HARI INI
+    public function getLaporanHarian()
+    {
+        // Query: "Ambil semua data dimana status 'selesai' DAN tanggal keluar adalah hari ini"
+        return $this->where('status', 'selesai')
+                    ->where('DATE(tgl_keluar)', date('Y-m-d'))
+                    ->findAll();
+    }
+
+    // 2. Ambil data transaksi yang selesai/keluar BULAN INI
+    public function getLaporanBulanan()
+    {
+        // Query: "Ambil semua data dimana status 'selesai' DAN bulan keluar adalah bulan ini"
+        return $this->where('status', 'selesai')
+                    ->where('MONTH(tgl_keluar)', date('m'))
+                    ->where('YEAR(tgl_keluar)', date('Y'))
+                    ->findAll();
+    }
+
+    // 3. Hitung TOTAL UANG (Pendapatan) BULAN INI
+    public function getTotalPendapatanBulanIni()
+    {
+        // Query: "Jumlahkan kolom 'biaya' pada bulan ini"
+        $query = $this->selectSum('biaya')
+                      ->where('status', 'selesai')
+                      ->where('MONTH(tgl_keluar)', date('m'))
+                      ->where('YEAR(tgl_keluar)', date('Y'))
+                      ->first();
+
+        // Kembalikan angkanya. Kalau kosong (belum ada transaksi), kembalikan 0.
+        return $query['biaya'] ?? 0; 
+    }
 }
