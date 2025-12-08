@@ -4,13 +4,13 @@ use App\Models\TransaksiModel;
 use App\Models\KendaraanModel; 
 use App\Models\StatusAreaModel; 
 
-class TransaksiKeluar extends BaseController
+class Update extends BaseController
 {
     public function index()
     {
         $data = [
             'title' => 'Transaksi Keluar',
-            'isi'   => 'form', 
+            'isi'   => 'update/index', 
             'petugas' => session()->get() 
         ];
 
@@ -40,7 +40,7 @@ class TransaksiKeluar extends BaseController
 
         if (!$dataMasuk) {
             $session->setFlashdata('gagal', 'Gagal! Transaksi ' . $id_transaksi . ' tidak ditemukan, sudah keluar, atau ID salah.');
-            return redirect()->to('/transaksikeluar');
+            return redirect()->to('/dashboard/update');
         }
 
         // 2. PENENTUAN BIAYA PARKIR (Tarif Flat)
@@ -84,6 +84,7 @@ class TransaksiKeluar extends BaseController
         $session->setFlashdata('berhasil', 
             'Kendaraan berhasil keluar. Durasi parkir: ' . $durasi_parkir . '. **TOTAL BAYAR: Rp ' . number_format($total_bayar) . '**'
         );
-        return redirect()->to('/transaksikeluar');
+        return redirect()->to('/dashboard/update');
     }
 }
+
