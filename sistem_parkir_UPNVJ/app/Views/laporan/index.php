@@ -1,7 +1,3 @@
-<?= $this->extend('layout/template'); ?> 
-
-<?= $this->section('content'); ?>
-
 <div class="container-fluid">
 
     <h1 class="h3 mb-4 text-gray-800">Laporan Pendapatan & Transaksi</h1>
@@ -9,12 +5,12 @@
     <ul class="nav nav-tabs mb-3" id="laporanTab" role="tablist">
         <li class="nav-item">
             <button class="nav-link active" id="harian-tab" data-bs-toggle="tab" data-bs-target="#harian" type="button" role="tab" aria-controls="harian" aria-selected="true">
-                📄 Laporan Harian (Minggu Ini)
+                Laporan Harian (Minggu Ini)
             </button>
         </li>
         <li class="nav-item">
             <button class="nav-link" id="bulanan-tab" data-bs-toggle="tab" data-bs-target="#bulanan" type="button" role="tab" aria-controls="bulanan" aria-selected="false">
-                📊 Laporan Bulanan
+                Laporan Bulanan
             </button>
         </li>
     </ul>
@@ -130,8 +126,7 @@
             </div>
         </div>
 
-    </div> </div>
+    </div> 
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-
-<?= $this->endSection(); ?>
