@@ -8,7 +8,7 @@ class Pelanggaran extends BaseController
     // 1. HALAMAN UTAMA (Daftar Pelanggaran Valid)
     public function index()
     {
-        // Panggil Model (Pastikan kamu sudah buat PelanggaranModel.php juga)
+        // Panggil Model (Pastikan sudah buat PelanggaranModel.php juga)
         $model = new PelanggaranModel();
         
         $data = [
@@ -104,12 +104,12 @@ class Pelanggaran extends BaseController
 
         $model = new PelanggaranModel();
         
-        // A. Cari data laporan berdasarkan ID dulu
+        // A. Cari data laporan berdasarkan ID terlebih dulu
         $laporan = $model->find($id);
 
         if ($laporan) {
             // B. Hapus File Gambar Fisik di folder 'uploads'
-            // Kita cek dulu apakah filenya ada agar tidak error
+            // Melakukan pengecekan apakah filenya ada agar tidak error
             $pathGambar = 'uploads/' . $laporan['foto'];
             
             if (file_exists($pathGambar)) {
