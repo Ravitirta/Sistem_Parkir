@@ -5,7 +5,7 @@
     <!-- Form ini mengarahkan ke Controller Update::index() dengan metode GET untuk filter -->
     <form action="<?= base_url('dashboard/update') ?>" method="get" class="d-flex">
         <input type="text" name="plat_nomor" placeholder="Cari Plat Nomor..." 
-               class="form-control me-2" value="<?= esc($this->request->getVar('plat_nomor') ?? '') ?>">
+               class="form-control me-2" value="<?= esc($request->getVar('plat_nomor') ?? '') ?>"
         <button type="submit" class="btn btn-primary">Cari</button>
         <a href="<?= base_url('dashboard/update') ?>" class="btn btn-secondary ms-2">Reset</a>
     </form>
