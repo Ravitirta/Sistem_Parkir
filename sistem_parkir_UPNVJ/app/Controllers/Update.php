@@ -10,7 +10,7 @@ class Update extends BaseController
     {
         $data = [
             'title' => 'Transaksi Keluar',
-            'isi'   => 'update/form', 
+            'isi'   => 'form', 
             'petugas' => session()->get() 
         ];
 
@@ -87,4 +87,5 @@ class Update extends BaseController
         return redirect()->to('/dashboard/update');
     }
 }
+
 
