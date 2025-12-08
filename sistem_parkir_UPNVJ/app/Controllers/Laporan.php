@@ -35,7 +35,7 @@ class Laporan extends BaseController
         ];
 
         // 4. Tampilkan file View index
-        return view('laporan/index', $data);
+        return view('laporan/wrapper', $data);
     }
 
     // --- FUNGSI CETAK LAPORAN ---
