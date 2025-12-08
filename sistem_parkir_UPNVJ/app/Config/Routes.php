@@ -6,41 +6,48 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
+// 1. RUTE PUBLIC (Bisa diakses SIAPA SAJA tanpa Login)
 // =================================================================
-// 1. RUTE AUTH (LOGIN/LOGOUT)
-// =================================================================
-$routes->get('/', 'Auth::index');
+
+// Halaman awal langsung ke Cek Status (Default Orang Umum)
+$routes->get('/', 'Status::index'); 
+
+// Rute Auth (Login & Logout)
+$routes->get('/auth', 'Auth::index'); 
 $routes->post('/auth/loginProcess', 'Auth::loginProcess');
 $routes->get('/auth/logout', 'Auth::logout');
 
-// =================================================================
-// 2. RUTE DASHBOARD (PARKIR) - WAJIB LOGIN
+// Rute Fitur Cek Status (Dibuka untuk Umum)
+$routes->get('dashboard/status', 'Status::index');
+
+// 2. RUTE PROTECTED (HANYA PETUGAS LOGIN)
 // =================================================================
 $routes->group('dashboard', ['filter' => 'auth'], function($routes) {
     
     // Dashboard Utama
     $routes->get('/', 'Dashboard::index');
     
-    // Transaksi Masuk
+    // Fitur Transaksi Masuk
     $routes->post('simpanMasuk', 'Dashboard::simpanMasuk');
 
-    // Cek Status
+    // Fitur Cek Status (Versi Admin)
     $routes->get('status', 'Status::index'); 
 
-    // --- Fitur Update / Checkout ---
+    // Fitur Update / Checkout
     $routes->get('update', 'Update::index'); 
     $routes->post('update/calculate/(:segment)', 'Update::calculate/$1'); 
     $routes->post('update/checkout/(:segment)', 'Update::checkout/$1'); 
 
-    // --- Fitur Transaksi Keluar ---
+    // Fitur Transaksi Keluar
     $routes->get('transaksiKeluar', 'TransaksiKeluar::index'); 
     $routes->post('transaksiKeluar/simpanKeluar', 'TransaksiKeluar::simpanKeluar');
 
-    // >>> FITUR LAPORAN (REKAP KEUANGAN/PARKIR) <<<
-    $routes->get('laporan', 'Laporan::index');          // Halaman filter
-    $routes->post('laporan/cetak', 'Laporan::cetak');   // Cetak laporan
+    // Fitur Laporan & History
+    $routes->get('laporan', 'Laporan::index');   
+    $routes->get('history', 'Laporan::history'); 
+    $routes->post('laporan/cetak', 'Laporan::cetak');
 
-}); // Tutup Grup Dashboard
+});
 
 
 // =================================================================
