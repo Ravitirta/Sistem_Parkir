@@ -25,7 +25,8 @@ class Laporan extends BaseController
         // 3. Siapkan Data untuk dikirim ke View Dashboard Laporan
         $data = [
             'title' => 'Laporan - Sistem Parkir UPNVJ',
-            'user'  => session()->get('nama_petugas'),
+            'isi' => 'laporan/index',
+            'user'  => session()->get('nama'),
             
             // Pastikan fungsi ini ada di TransaksiModel
             'laporan_harian'  => $this->transaksiModel->getLaporanHarian(),
