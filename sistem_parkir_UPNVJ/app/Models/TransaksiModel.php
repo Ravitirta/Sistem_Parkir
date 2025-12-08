@@ -18,7 +18,7 @@ class TransaksiModel extends Model
         'tgl_masuk', 
         'tgl_keluar', 
         'biaya', 
-        'status', 
+        'status_transaksi', 
         'keterangan'
     ];
 
@@ -33,8 +33,8 @@ class TransaksiModel extends Model
     // 1. Ambil data transaksi yang selesai/keluar HARI INI
     public function getLaporanHarian()
     {
-        // Query: "Ambil semua data dimana status 'selesai' DAN tanggal keluar adalah hari ini"
-        return $this->where('status', 'selesai')
+        // Query: "Ambil semua data dimana status_transaksi 'selesai' DAN tanggal keluar adalah hari ini"
+        return $this->where('status_transaksi', 'selesai')
                     ->where('DATE(tgl_keluar)', date('Y-m-d'))
                     ->findAll();
     }
@@ -42,8 +42,8 @@ class TransaksiModel extends Model
     // 2. Ambil data transaksi yang selesai/keluar BULAN INI
     public function getLaporanBulanan()
     {
-        // Query: "Ambil semua data dimana status 'selesai' DAN bulan keluar adalah bulan ini"
-        return $this->where('status', 'selesai')
+        // Query: "Ambil semua data dimana status_transaksi 'selesai' DAN bulan keluar adalah bulan ini"
+        return $this->where('status_transaksi', 'selesai')
                     ->where('MONTH(tgl_keluar)', date('m'))
                     ->where('YEAR(tgl_keluar)', date('Y'))
                     ->findAll();
@@ -54,7 +54,7 @@ class TransaksiModel extends Model
     {
         // Query: "Jumlahkan kolom 'biaya' pada bulan ini"
         $query = $this->selectSum('biaya')
-                      ->where('status', 'selesai')
+                      ->where('status_transaksi', 'selesai')
                       ->where('MONTH(tgl_keluar)', date('m'))
                       ->where('YEAR(tgl_keluar)', date('Y'))
                       ->first();
