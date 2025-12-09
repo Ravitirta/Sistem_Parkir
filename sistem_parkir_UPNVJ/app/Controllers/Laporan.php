@@ -53,8 +53,32 @@ class Laporan extends BaseController
 
     public function history()
     {
-        // Fitur history sebenarnya sama dengan index tapi mungkin nanti beda view
-        return $this->index(); 
+        // 1. Cek Login
+        if (!session()->get('logged_in')) { return redirect()->to('/'); }
+
+        // 2. Tangkap Filter (Bulan & Tahun)
+        $bulan_pilih = $this->request->getVar('bulan') ?? date('m');
+        $tahun_pilih = $this->request->getVar('tahun') ?? date('Y');
+
+        // 3. Ambil Data (Pastikan Teman Anda sudah buat getHistoryData di Model)
+        // Jika belum ada, biarkan array kosong [] dulu agar tidak error
+        $data_history = $this->transaksiModel->getHistoryData($bulan_pilih, $tahun_pilih);
+        // $data_history = []; // Pakai ini jika Model belum siap
+
+        $data = [
+            'title' => 'History Transaksi (>30 Hari)',
+            'isi'   => 'history/index',
+            'user'  => session()->get('nama'),
+            
+            // Variabel untuk Filter View
+            'bulan_ini' => $bulan_pilih,
+            'tahun_ini' => $tahun_pilih,
+            
+            // Data Tabel
+            'data_history' => $data_history
+        ];
+
+        return view('layout/wrapper', $data);
     }
 
     // --- FUNGSI CETAK LAPORAN ---

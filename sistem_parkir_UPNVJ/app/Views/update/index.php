@@ -12,14 +12,14 @@
 </div>
 
 <!-- Daftar List Kendaraan yang Masih Parkir -->
-<div class="overflow-x-auto bg-white shadow-lg rounded-lg">
+<div>
     <table class="table table-hover">
         <thead class="bg-light">
             <tr>
                 <th scope="col">Jenis Kendaraan</th>
                 <th scope="col">Plat Nomor</th>
                 <th scope="col">Waktu Masuk</th>
-                <th scope="col">Waktu Keluar (Realtime)</th>
+                <th scope="col">Waktu Keluar</th>
                 <th scope="col">Harga Bayar</th>
                 <th scope="col">Aksi</th>
             </tr>
@@ -28,15 +28,18 @@
             <?php if (empty($transaksiMasuk)): ?>
                 <tr>
                     <td colspan="6" class="text-center text-muted">
-                        Tidak ada kendaraan yang sedang parkir atau tidak ditemukan.
+                        Tidak ada kendaraan yang sedang parkir.
                     </td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($transaksiMasuk as $transaksi): ?>
                     <?php
-                        // Ambil data perhitungan dari flashdata
-                        $hitungData = session()->getFlashdata('hitung_bayar_' . $transaksi['id_transaksi']);
-                        $isCalculated = !empty($hitungData);
+                    $hitungData = session()->get('hitung_bayar_' . $transaksi['id_transaksi']); 
+                    $isCalculated = !empty($hitungData) && (session()->getFlashdata('perhitungan_berhasil') === $transaksi['id_transaksi']);
+                    
+                    if (!empty($hitungData)) {
+                        $isCalculated = true;
+                    }
                     ?>
                     <tr>
                         <td><?= esc($transaksi['jenis_kendaraan']) ?></td>
@@ -57,7 +60,7 @@
                                 <form action="<?= base_url('dashboard/update/calculate/' . $transaksi['id_transaksi']) ?>" method="post" class="d-inline">
                                     <?= csrf_field() ?>
                                     <button type="submit" class="btn btn-sm btn-info text-white">
-                                        Hitung Bayar (OUT)
+                                        Bayar (OUT)
                                     </button>
                                 </form>
                             <?php else: ?>
