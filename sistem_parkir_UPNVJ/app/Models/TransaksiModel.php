@@ -31,11 +31,7 @@ class TransaksiModel extends Model
 
     // 1. Ambil data transaksi yang selesai HARI INI
     public function getLaporanHarian()
-    {
-        // KITA HARUS JOIN KE TABEL PENGGUNA & AREA
-        // Karena di tabel transaksi cuma ada ID (PG_001, AR_001), 
-        // sedangkan kita butuh Plat Nomor dan Nama Area untuk ditampilkan.
-        
+    {   
         return $this->select('transaksi.*, pengguna.plat_nomor, area_parkir.nama_area')
                     ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna', 'left')
                     ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
@@ -51,33 +47,35 @@ class TransaksiModel extends Model
     }
 
     // 2. Ambil Rekap Pendapatan Per Area BULAN INI
-    public function getLaporanBulanan()
+    // 2. Laporan Bulanan (DIPERBAIKI: Menerima Parameter Bulan & Tahun)
+    public function getLaporanBulanan($bulan = null, $tahun = null)
     {
+        // Jika tidak ada filter, pakai bulan/tahun sekarang
+        $bulan = $bulan ?? date('m');
+        $tahun = $tahun ?? date('Y');
+
         return $this->select('area_parkir.nama_area, transaksi.tanggal_transaksi, SUM(transaksi.bayar) as pendapatan_per_area')
                     ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
-                    
-                    // PERBAIKAN: Gunakan 'status_transaksi'
                     ->where('status_transaksi', 'selesai')
-                    
-                    // Filter Bulan & Tahun Ini
-                    ->where('MONTH(tanggal_transaksi)', date('m'))
-                    ->where('YEAR(tanggal_transaksi)', date('Y'))
-                    
+                    // Filter sesuai inputan Controller
+                    ->where('MONTH(tanggal_transaksi)', $bulan)
+                    ->where('YEAR(tanggal_transaksi)', $tahun)
                     ->groupBy('transaksi.id_area') 
                     ->findAll();
     }
 
     // 3. Hitung TOTAL UANG (Pendapatan) BULAN INI
-    public function getTotalPendapatanBulanIni()
+    public function getTotalPendapatanBulanIni($bulan = null, $tahun = null)
     {
-        // PERBAIKAN: Gunakan 'bayar' (sesuai DB), BUKAN 'biaya'
+        $bulan = $bulan ?? date('m');
+        $tahun = $tahun ?? date('Y');
+
         $query = $this->selectSum('bayar') 
                       ->where('status_transaksi', 'selesai')
-                      ->where('MONTH(tanggal_transaksi)', date('m'))
-                      ->where('YEAR(tanggal_transaksi)', date('Y'))
+                      ->where('MONTH(tanggal_transaksi)', $bulan)
+                      ->where('YEAR(tanggal_transaksi)', $tahun)
                       ->first();
 
-        // Jika null (belum ada data), kembalikan 0
         return $query['bayar'] ?? 0; 
     }
 }
