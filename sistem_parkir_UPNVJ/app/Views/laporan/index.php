@@ -23,6 +23,20 @@
                 <div class="col-auto">
                     <span class="fw-bold text-secondary"><i class="bi bi-funnel-fill me-1"></i> Filter Data:</span>
                 </div>
+
+                <!-- PILIH AREA -->
+                <div class="col-auto">
+                    <select name="area" class="form-select form-select-sm border-secondary shadow-sm" style="min-width: 150px;">
+                        <option value="">-- Semua Area --</option>
+                        <?php if(!empty($list_area)): ?>
+                            <?php foreach($list_area as $a): ?>
+                                <option value="<?= $a['id_area']; ?>" <?= ($a['id_area'] == ($area_ini ?? '')) ? 'selected' : ''; ?>>
+                                    <?= esc($a['nama_area']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </select>
+                </div>
                 
                 <!-- PILIH BULAN -->
                 <div class="col-auto">
@@ -99,6 +113,48 @@
         <!-- TAB HARIAN -->
         <!-- ========================== -->
         <div class="tab-pane fade show active" id="harian" role="tabpanel">
+            
+            <!-- REKAP PENDAPATAN HARI INI PER AREA -->
+            <div class="row mb-3">
+                <?php $total_hari_ini = 0; ?>
+                <?php if(!empty($rekap_harian)): ?>
+                    <?php foreach($rekap_harian as $rh): 
+                        $total_hari_ini += $rh['total_harian']; 
+                    ?>
+                    <div class="col-md-3 mb-2">
+                        <div class="card bg-primary bg-opacity-10 border-primary shadow-sm h-100">
+                            <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-primary fw-bold text-uppercase"><?= esc($rh['nama_area']); ?></small>
+                                    <div class="fw-bold text-dark">Rp <?= number_format($rh['total_harian'], 0, ',', '.'); ?></div>
+                                </div>
+                                <i class="bi bi-cash text-primary fs-3 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                    
+                    <!-- Total Keseluruhan Hari Ini -->
+                    <div class="col-md-3 mb-2">
+                        <div class="card bg-success text-white shadow-sm border-0 h-100">
+                            <div class="card-body p-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="opacity-75 text-uppercase">TOTAL HARI INI</small>
+                                    <div class="fw-bold">Rp <?= number_format($total_hari_ini, 0, ',', '.'); ?></div>
+                                </div>
+                                <i class="bi bi-wallet2 fs-3 opacity-50"></i>
+                            </div>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <div class="col-12">
+                        <div class="alert alert-warning py-2 small shadow-sm border-0">
+                            <i class="bi bi-info-circle-fill me-2"></i> Belum ada pendapatan masuk hari ini.
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+            
             <div class="card shadow-sm border-0">
                 <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                     <h6 class="m-0 fw-bold text-primary">
