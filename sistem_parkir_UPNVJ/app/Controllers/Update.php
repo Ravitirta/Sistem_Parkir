@@ -74,39 +74,55 @@ class Update extends BaseController
         $db = \Config\Database::connect();
         $session = session();
 
-        // Ambil data harga & waktu masuk
+        // 1. Ambil data lengkap (Tanggal & Waktu Masuk)
         $dataMasuk = $db->table('transaksi t')
-                        ->select('t.waktu_masuk, k.harga_perjam') 
+                        ->select('t.tanggal_transaksi, t.waktu_masuk, k.harga_perjam') 
                         ->join('kendaraan k', 'k.id_kendaraan = t.id_kendaraan')
                         ->where('t.id_transaksi', $id_transaksi)
                         ->get()->getRow();
 
         if (!$dataMasuk) {
             $session->setFlashdata('gagal', 'Data transaksi tidak ditemukan.');
-            return redirect()->to('/dashboard/update');
+            return redirect()->back();
         }
 
-        // Hitung Durasi (Jam)
-        $masuk = strtotime($dataMasuk->waktu_masuk);
-        $keluar = time(); // Waktu sekarang
-        $durasi_detik = $keluar - $masuk;
-        $durasi_jam = ceil($durasi_detik / 3600); // Pembulatan ke atas (1 jam 1 menit = 2 jam)
+        // 2. Buat Timestamp Masuk (Gabungan Tanggal + Jam)
+        // Contoh: "2025-12-09 07:00:00"
+        $waktuMasukString = $dataMasuk->tanggal_transaksi . ' ' . $dataMasuk->waktu_masuk;
+        $timestampMasuk   = strtotime($waktuMasukString);
         
-        if($durasi_jam < 1) $durasi_jam = 1; // Minimal 1 jam
+        // 3. Ambil Timestamp Keluar (Realtime)
+        $timestampKeluar  = time(); 
 
-        $total_bayar = $durasi_jam * $dataMasuk->harga_perjam;
-        $waktu_keluar_real = date('H:i:s');
+        // 4. Hitung Selisih Detik
+        $selisihDetik = $timestampKeluar - $timestampMasuk;
 
-        // Simpan hasil hitungan di Session Sementara
+        // 5. Konversi ke Jam dengan Pembulatan Standar
+        // round() membulatkan ke bilangan bulat terdekat.
+        $durasiJam = round($selisihDetik / 3600); 
+        
+        // Minimal bayar 1 jam (jika hasil round 0, tetap dihitung 1)
+        if($durasiJam < 1) $durasiJam = 1; 
+        
+        // 6. Hitung Total Bayar
+        $total_bayar = $durasiJam * $dataMasuk->harga_perjam;
+        
+        // Format Waktu Keluar untuk Database
+        $waktu_keluar_real = date('H:i:s', $timestampKeluar);
+
+        // Simpan ke Session Sementara
         $session->set('hitung_bayar_' . $id_transaksi, [
-            'total_bayar' => $total_bayar,
+            'total_bayar'       => $total_bayar,
             'waktu_keluar_real' => $waktu_keluar_real,
-            'durasi' => $durasi_jam
+            'durasi'            => $durasiJam,
+            'detail_masuk'      => $dataMasuk->waktu_masuk, 
+            'detail_keluar'     => $waktu_keluar_real       
         ]);
         
         $session->setFlashdata('perhitungan_berhasil', $id_transaksi); 
         
-        return redirect()->to('/dashboard/update?area=' . $this->request->getVar('area_redirect')); // Redirect bawa filter area
+        // Redirect kembali dengan membawa filter area agar tidak reset
+        return redirect()->to('/dashboard/update?area=' . $this->request->getVar('area_redirect')); 
     }
 
     // --- FUNGSI CHECKOUT (SELESAI) ---
