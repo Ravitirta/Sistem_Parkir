@@ -38,7 +38,7 @@ class Laporan extends BaseController
         $tgl_awal = $this->request->getPost('tgl_awal');
         $tgl_akhir = $this->request->getPost('tgl_akhir');
 
-        // Ambil data sesuai tanggal
+        // Mengambil data sesuai tanggal
         $laporan = $this->transaksiModel->getLengkap()
             ->where('tanggal_transaksi >=', $tgl_awal)
             ->where('tanggal_transaksi <=', $tgl_akhir)
