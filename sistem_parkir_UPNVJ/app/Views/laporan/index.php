@@ -80,9 +80,6 @@
                     <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
                         <i class="bi bi-search me-1"></i> Tampilkan
                     </button>
-                    <a href="/dashboard/laporan" class="btn btn-outline-secondary btn-sm shadow-sm" title="Reset">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                    </a>
                 </div>
             </form>
         </div>
