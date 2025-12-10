@@ -4,14 +4,14 @@ use CodeIgniter\Model;
 
 class TransaksiModel extends Model
 {
-    // --- KONFIGURASI TABEL (SESUAI GAMBAR DATABASE) ---
+    // --- KONFIGURASI TABEL ---
     protected $table      = 'transaksi';      
     protected $primaryKey = 'id_transaksi';   
     
-    // Agar CI4 tidak bingung mencari created_at/updated_at
+    // Non-aktifkan timestamps otomatis (created_at/updated_at) karena kita pakai manual
     protected $useTimestamps = false; 
 
-    // Daftar kolom yang benar-benar ada di tabel database kamu
+    // Daftar kolom yang boleh diisi
     protected $allowedFields = [
         'id_transaksi', 
         'tanggal_transaksi', 
@@ -26,10 +26,13 @@ class TransaksiModel extends Model
     ];
 
     // =================================================================
-    // METHOD KHUSUS UNTUK LAPORAN
+    // METHOD KHUSUS UNTUK FITUR LAPORAN
     // =================================================================
 
-    // 1. Ambil data transaksi yang selesai HARI INI
+    /**
+     * 1. Ambil data transaksi yang selesai HARI INI
+     * Digunakan di halaman Laporan Harian
+     */
     public function getLaporanHarian($area_filter = null)
     {
         $builder = $this->select('transaksi.*, pengguna.plat_nomor, area_parkir.nama_area')
@@ -38,7 +41,7 @@ class TransaksiModel extends Model
                         ->where('status_transaksi', 'selesai')
                         ->where('tanggal_transaksi', date('Y-m-d'));
 
-        // Tambahan Filter Area
+        // Tambahan Filter Area (Jika dipilih)
         if (!empty($area_filter)) {
             $builder->where('transaksi.id_area', $area_filter);
         }
@@ -46,7 +49,10 @@ class TransaksiModel extends Model
         return $builder->orderBy('waktu_keluar', 'DESC')->findAll();
     }
 
-     // Hitung Total Pendapatan Harian Per Area (Untuk Tabel Tambahan)
+    /**
+     * Hitung Total Pendapatan Harian Per Area
+     * Digunakan untuk tabel rekap kecil di Laporan Harian
+     */
     public function getRekapHarianPerArea($area_filter = null)
     {
         $builder = $this->select('area_parkir.nama_area, SUM(transaksi.bayar) as total_harian')
@@ -61,10 +67,13 @@ class TransaksiModel extends Model
         return $builder->groupBy('transaksi.id_area')->findAll();
     }
     
-    // 2. Laporan Bulanan (Menerima Parameter Bulan & Tahun)
+    /**
+     * 2. Laporan Bulanan (Menerima Parameter Bulan & Tahun)
+     * Mengelompokkan pendapatan berdasarkan tanggal dan area
+     */
     public function getLaporanBulanan($bulan = null, $tahun = null, $area_filter = null)
     {
-        // Pastikan parameter tidak null/kosong sebelum masuk query
+        // Set default ke bulan/tahun sekarang jika parameter kosong
         $bulan = empty($bulan) ? date('m') : $bulan;
         $tahun = empty($tahun) ? date('Y') : $tahun;
 
@@ -78,10 +87,14 @@ class TransaksiModel extends Model
             $builder->where('transaksi.id_area', $area_filter);
         }
 
+        // Group by area agar muncul per area pendapatannya
         return $builder->groupBy('transaksi.id_area')->findAll();
     }
 
-    // 3. Hitung TOTAL UANG (Pendapatan) BULAN INI
+    /**
+     * 3. Hitung TOTAL UANG (Pendapatan) BULAN INI
+     * Mengembalikan satu angka total (integer)
+     */
     public function getTotalPendapatanBulanIni($bulan = null, $tahun = null, $area_filter = null)
     {
         $bulan = empty($bulan) ? date('m') : $bulan;
@@ -100,43 +113,38 @@ class TransaksiModel extends Model
         return $query['bayar'] ?? 0; 
     }
 
-    # METHOD UNTUK HISTORY (Riwayat Detail)
-    public function area_parkir.nama_area($bulan = null, $tahun = null)
+    // =================================================================
+    // METHOD UNTUK FITUR HISTORY (ARSIP)
+    // =================================================================
+
+    /**
+     * Mengambil detail riwayat transaksi berdasarkan Bulan & Tahun
+     * Termasuk Join ke tabel Area, Pengguna, Kendaraan, dan Petugas
+     */
+    public function getHistoryData($bulan = null, $tahun = null)
     {
         $bulan = $bulan ?? date('m');
         $tahun = $tahun ?? date('Y');
 
-        // Kita perlu JOIN ke 3 tabel: Pengguna (Plat), Kendaraan (Jenis), Petugas (Nama)
-        return $this->select('transaksi.*, pengguna.plat_nomor, kendaraan.jenis_kendaraan, petugas.nama as nama_petugas')
-                    ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna', 'left')
-                
-                    ->join('kendaraan', 'kendaraan.id_kendaraan = transaksi.id_kendaraan', 'left')
-                    
-                    ->join('petugas', 'petugas.id_petugas = transaksi.id_petugas', 'left')
-                    
-                    ->where('status_transaksi', 'selesai')
-                    ->where('MONTH(tanggal_transaksi)', $bulan)
-                    ->where('YEAR(tanggal_transaksi)', $tahun)
-                    ->orderBy('waktu_keluar', 'DESC')
-                    ->findAll();
-    }
-# METHOD UNTUK HISTORY (Riwayat Detail)
-    public function area_parkir.nama_area($bulan = null, $tahun = null)
-    {
-        $bulan = $bulan ?? date('m');
-        $tahun = $tahun ?? date('Y');
-
-        // TAMBAHAN: Select 'area_parkir.nama_area' dan Join ke tabel 'area_parkir'
         return $this->select('transaksi.*, pengguna.plat_nomor, kendaraan.jenis_kendaraan, petugas.nama as nama_petugas, area_parkir.nama_area')
+                    // Join ke tabel Pengguna untuk ambil Plat Nomor
                     ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna', 'left')
+                    
+                    // Join ke tabel Kendaraan untuk ambil Jenis (Mobil/Motor)
                     ->join('kendaraan', 'kendaraan.id_kendaraan = transaksi.id_kendaraan', 'left')
+                    
+                    // Join ke tabel Petugas untuk ambil Nama Petugas
                     ->join('petugas', 'petugas.id_petugas = transaksi.id_petugas', 'left')
-                    // Join Baru:
+                    
+                    // Join ke tabel Area Parkir untuk ambil Nama Area (UPDATE BARU)
                     ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
                     
+                    // Filter Status Selesai & Sesuai Bulan/Tahun
                     ->where('status_transaksi', 'selesai')
                     ->where('MONTH(tanggal_transaksi)', $bulan)
                     ->where('YEAR(tanggal_transaksi)', $tahun)
+                    
+                    // Urutkan dari yang paling baru keluar
                     ->orderBy('waktu_keluar', 'DESC')
                     ->findAll();
     }
