@@ -5,9 +5,6 @@
         
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="card-title text-muted">Realtime Updates</h5>
-            <a href="" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-arrow-clockwise"></i> Refresh Data
-            </a>
         </div>
 
         <div class="table-responsive">
