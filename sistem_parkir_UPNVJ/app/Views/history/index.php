@@ -11,7 +11,7 @@
 
     <div class="card shadow-sm border-0 mb-4 bg-white">
         <div class="card-body py-3">
-            <form action="<?= base_url('history') ?>" method="get" class="row g-2 align-items-center">
+           <form action="<?= base_url('dashboard/history') ?>" method="get" class="d-flex gap-2">
                 <div class="col-auto">
                     <span class="fw-bold text-secondary"><i class="bi bi-funnel-fill me-1"></i> Filter Data:</span>
                 </div>
