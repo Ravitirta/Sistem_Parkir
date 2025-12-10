@@ -10,7 +10,7 @@
             <div class="mb-4">
                 <label class="form-label text-muted">Plat Nomor</label>
                 <!-- Hapus 'required' -->
-                <input type="text" name="plat_nomor" id="plat_nomor" class="form-control form-control-lg" placeholder="Contoh: 3477WCD">
+                <input type="text" name="plat_nomor" id="plat_nomor" class="form-control form-control-lg" placeholder="Contoh: B 3477 WCD">
             </div>
 
             <!-- INPUT AREA PARKIR -->
@@ -86,4 +86,5 @@
         }
         // Jika tidak ada error, form akan lanjut submit secara otomatis
     });
+
 </script>
