@@ -57,7 +57,7 @@
                     <button type="submit" class="btn btn-primary btn-sm px-3 shadow-sm">
                         <i class="bi bi-search me-1"></i> Tampilkan
                     </button>
-                    <a href="<?= base_url('history') ?>" class="btn btn-outline-secondary btn-sm shadow-sm" title="Reset Filter">
+                    <a href="<?= base_url('dashboard/history') ?>" class="btn btn-outline-secondary btn-sm shadow-sm" title="Reset Filter">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </a>
                 </div>
