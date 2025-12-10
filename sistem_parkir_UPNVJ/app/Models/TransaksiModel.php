@@ -101,7 +101,7 @@ class TransaksiModel extends Model
     }
 
     # METHOD UNTUK HISTORY (Riwayat Detail)
-    public function getHistoryData($bulan = null, $tahun = null)
+    public function area_parkir.nama_area($bulan = null, $tahun = null)
     {
         $bulan = $bulan ?? date('m');
         $tahun = $tahun ?? date('Y');
@@ -121,7 +121,7 @@ class TransaksiModel extends Model
                     ->findAll();
     }
 # METHOD UNTUK HISTORY (Riwayat Detail)
-    public function getHistoryData($bulan = null, $tahun = null)
+    public function area_parkir.nama_area($bulan = null, $tahun = null)
     {
         $bulan = $bulan ?? date('m');
         $tahun = $tahun ?? date('Y');
