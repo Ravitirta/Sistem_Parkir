@@ -120,4 +120,24 @@ class TransaksiModel extends Model
                     ->orderBy('waktu_keluar', 'DESC')
                     ->findAll();
     }
+# METHOD UNTUK HISTORY (Riwayat Detail)
+    public function getHistoryData($bulan = null, $tahun = null)
+    {
+        $bulan = $bulan ?? date('m');
+        $tahun = $tahun ?? date('Y');
+
+        // TAMBAHAN: Select 'area_parkir.nama_area' dan Join ke tabel 'area_parkir'
+        return $this->select('transaksi.*, pengguna.plat_nomor, kendaraan.jenis_kendaraan, petugas.nama as nama_petugas, area_parkir.nama_area')
+                    ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna', 'left')
+                    ->join('kendaraan', 'kendaraan.id_kendaraan = transaksi.id_kendaraan', 'left')
+                    ->join('petugas', 'petugas.id_petugas = transaksi.id_petugas', 'left')
+                    // Join Baru:
+                    ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
+                    
+                    ->where('status_transaksi', 'selesai')
+                    ->where('MONTH(tanggal_transaksi)', $bulan)
+                    ->where('YEAR(tanggal_transaksi)', $tahun)
+                    ->orderBy('waktu_keluar', 'DESC')
+                    ->findAll();
+    }
 }
