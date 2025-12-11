@@ -12,7 +12,7 @@
                 <i class="bi bi-camera-fill me-2"></i>Lapor Baru
             </a>
 
-            <!-- Tombol Kelola (Hanya Petugas) -->
+            <!-- Tombol Kelola (Khusus Petugas) -->
             <?php if(session()->get('logged_in')): ?>
                 <a href="/pelanggaran/manage" class="btn btn-warning text-dark shadow-sm fw-bold">
                     <i class="bi bi-pencil-square me-2"></i>Verifikasi Masuk
@@ -57,7 +57,7 @@
             <div class="col-12 col-md-6 col-lg-4 col-xl-3">
                 <div class="card h-100 shadow-sm border-0 overflow-hidden card-hover">
                     
-                    <!-- BAGIAN FOTO -->
+                    <!-- UPLOAD FOTO -->
                     <div class="position-relative">
                         <img src="/uploads/<?= $row['foto']; ?>" 
                              class="card-img-top" 
