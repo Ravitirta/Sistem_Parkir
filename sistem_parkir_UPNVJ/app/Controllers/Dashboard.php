@@ -118,13 +118,9 @@ class Dashboard extends BaseController
 
         // --- 4. UPDATE LOG STATUS & HISTORY AREA ---
         
-        // --- REVISI LANGKAH 5 (PASTIKAN KODENYA SEPERTI INI) ---
-        // Masalahmu terjadi karena kode di sini mencoba 'insert' data baru.
-        // Kita harus paksa pakai SQL 'UPDATE' agar dia hanya mengedit data yang sudah ada.
-        
         $id_area = $this->request->getPost('id_area');
         
-        // Query SQL Manual agar 100% aman
+        // Query SQL Manual
         $sql = "UPDATE status_area 
                 SET kapasitas_now = kapasitas_now + 1, 
                     jam = ? 
