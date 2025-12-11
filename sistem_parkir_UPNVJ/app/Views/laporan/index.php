@@ -106,9 +106,9 @@
     <!-- BAGIAN 4: ISI KONTEN -->
     <div class="tab-content" id="myTabContent">
         
-        <!-- ========================== -->
-        <!-- TAB HARIAN -->
-        <!-- ========================== -->
+        <!-- ============== -->
+        <!-- TAB HARIAN     -->
+        <!-- ============== -->
         <div class="tab-pane fade show active" id="harian" role="tabpanel">
             
             <!-- REKAP PENDAPATAN HARI INI PER AREA -->
@@ -207,9 +207,9 @@
             </div>
         </div>
 
-        <!-- ========================== -->
-        <!-- TAB BULANAN -->
-        <!-- ========================== -->
+        <!-- =============== -->
+        <!-- TAB BULANAN     -->
+        <!-- =============== -->
         <div class="tab-pane fade" id="bulanan" role="tabpanel">
             
             <!-- Info Filter -->
