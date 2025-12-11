@@ -37,10 +37,10 @@
         </script>
     <?php endif; ?>
 
-    <!-- FILTER PENCARIAN (VALIDASI JS) -->
+    <!-- FILTER PENCARIAN DENGAN VALIDASIJS -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
-            <!-- Tambahkan ID 'formCari' untuk ditangkap JS -->
+            <!-- ID 'formCari' untuk ditangkap JS -->
             <form action="<?= base_url('dashboard/update') ?>" method="get" class="row g-3 align-items-end" id="formCari">
                 
                 <!-- PILIH AREA -->
@@ -61,7 +61,7 @@
                     <label class="form-label fw-bold text-muted small">Cari Plat Nomor</label>
                     <div class="input-group">
                         <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
-                        <!-- HAPUS 'required', validasi pindah ke JS -->
+                        <!-- HAPUS 'required'& validasi pindah ke JS -->
                         <input type="text" name="plat_nomor" id="inputPlat" class="form-control" 
                                placeholder="Masukkan Plat Nomor..." 
                                value="<?= esc($request->getVar('plat_nomor') ?? '') ?>">
@@ -93,7 +93,7 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead class="bg-light text-dark">
                         <tr>
-                            <!-- KOLOM AREA PARKIR (BARU) -->
+                            <!-- KOLOM AREA PARKIR -->
                             <th class="ps-4 py-3">Area Parkir</th>
                             <th>Jenis Kendaraan</th>
                             <th>Plat Nomor</th>
@@ -114,7 +114,7 @@
                         <?php else: ?>
                             <?php foreach ($transaksiMasuk as $transaksi): ?>
                                 <?php
-                                    // Cek apakah data ini sudah dihitung biayanya (ada di session)
+                                    // Untuk mengecek apakah data ini sudah dihitung biayanya (ada di session)
                                     $hitungData = session()->get('hitung_bayar_' . $transaksi['id_transaksi']); 
                                     $isCalculated = !empty($hitungData) && (session()->getFlashdata('perhitungan_berhasil') === $transaksi['id_transaksi'] || !empty($hitungData));
                                 ?>
@@ -164,7 +164,7 @@
                                     <!-- 7. Tombol Aksi -->
                                     <td class="text-end pe-4">
                                         <?php if(!$isCalculated): ?>
-                                            <!-- Tombol HITUNG (Biru) -->
+                                            <!-- Tombol HITUNG -->
                                             <form action="<?= base_url('dashboard/update/calculate/' . $transaksi['id_transaksi']) ?>" method="post" class="d-inline">
                                                 <?= csrf_field() ?>
                                                 <input type="hidden" name="area_redirect" value="<?= $selected_area ?>">
@@ -173,10 +173,10 @@
                                                 </button>
                                             </form>
                                         <?php else: ?>
-                                            <!-- Tombol BAYAR (Hijau) - Validasi JS -->
+                                            <!-- Tombol BAYAR dengan validasi  JS -->
                                             <form action="<?= base_url('dashboard/update/checkout/' . $transaksi['id_transaksi']) ?>" method="post" class="d-inline" id="formCheckout<?= $transaksi['id_transaksi'] ?>">
                                                 <?= csrf_field() ?>
-                                                <!-- Gunakan type="button" agar tidak submit otomatis, kita handle pakai JS -->
+                                                <!-- pakai type="button" agar tidak submit otomatis, handle pakai JS -->
                                                 <button type="button" class="btn btn-sm btn-success shadow-sm px-3 btn-bayar" 
                                                         data-id="<?= $transaksi['id_transaksi'] ?>" 
                                                         data-plat="<?= esc($transaksi['plat_nomor']) ?>" 
@@ -197,9 +197,7 @@
     </div>
 </div>
 
-<!-- ============================================== -->
-<!-- SCRIPT VALIDASI JAVASCRIPT (SWEETALERT2)       -->
-<!-- ============================================== -->
+<!-- VALIDASI JAVASCRIPT (SWEETALERT2) -->
 <script>
     // 1. VALIDASI FORM PENCARIAN
     document.getElementById('formCari').addEventListener('submit', function(e) {
@@ -233,7 +231,7 @@
             const bayar = this.getAttribute('data-bayar');
             const durasi = this.getAttribute('data-durasi');
 
-            // Tampilkan SweetAlert Konfirmasi
+            // Konfirmasi dengan SweetAlert 
             Swal.fire({
                 title: 'Konfirmasi Pembayaran',
                 html: `
@@ -253,7 +251,7 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Jika Yes, submit form terkait
+                    // Jika Yes, submit
                     document.getElementById('formCheckout' + id).submit();
                 }
             });
