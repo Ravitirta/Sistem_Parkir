@@ -4,14 +4,23 @@ use CodeIgniter\Model;
 
 class TransaksiModel extends Model
 {
-    // --- KONFIGURASI TABEL ---
-    protected $table      = 'transaksi';      
-    protected $primaryKey = 'id_transaksi';   
-    
-    // Non-aktifkan timestamps otomatis (created_at/updated_at) karena kita pakai manual
-    protected $useTimestamps = false; 
+    // ------------------------
+    // KONFIGURASI DASAR MODEL
+    // ------------------------
+    /*
+     Kelas Model ini digunakan oleh Laporan.php untuk mengambil data transaksi dari database. 
+     Semua fungsi laporan yang dipanggil Controller berada di sini.
+     */
+    protected $table      = 'transaksi';       // Nama tabel utama yang digunakan
+    protected $primaryKey = 'id_transaksi';    // Primary key tabel
 
-    // Daftar kolom yang boleh diisi
+    // Timestamps otomatis dimatikan karena aplikasi mengatur sendiri waktu masuk/keluar
+    protected $useTimestamps = false;
+
+    /*
+     Kolom-kolom yang boleh diproses Model.
+     Hal ini diperlukan ketika Controller menyimpan atau meng-update data.
+     */
     protected $allowedFields = [
         'id_transaksi', 
         'tanggal_transaksi', 
@@ -22,16 +31,22 @@ class TransaksiModel extends Model
         'id_kendaraan',  
         'id_petugas', 
         'bayar', 
-        'status_transaksi' 
+        'status_transaksi'
     ];
 
-    // =================================================================
-    // METHOD KHUSUS UNTUK FITUR LAPORAN
-    // =================================================================
+    // ==========================================================
+    // BAGIAN INI: METHOD KHUSUS YANG DIPANGGIL OLEH Laporan.php
+    // ==========================================================
 
     /**
-     * 1. Ambil data transaksi yang selesai HARI INI
-     * Digunakan di halaman Laporan Harian
+     1. LAPORAN HARIAN
+     Method ini dipanggil oleh Laporan.php pada bagian:
+        $this->transaksiModel->getLaporanHarian($area_pilih)
+    
+     Fungsi:
+     - Mengambil semua transaksi yang selesai pada HARI INI
+     - Digunakan untuk tampilan tabel laporan harian
+     - Bisa difilter berdasarkan area tertentu
      */
     public function getLaporanHarian($area_filter = null)
     {
@@ -39,9 +54,9 @@ class TransaksiModel extends Model
                         ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna', 'left')
                         ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
                         ->where('status_transaksi', 'selesai')
-                        ->where('tanggal_transaksi', date('Y-m-d'));
+                        ->where('tanggal_transaksi', date('Y-m-d'));   // HANYA hari ini
 
-        // Tambahan Filter Area (Jika dipilih)
+        // Filter area sesuai pilihan user pada Laporan.php
         if (!empty($area_filter)) {
             $builder->where('transaksi.id_area', $area_filter);
         }
@@ -50,8 +65,13 @@ class TransaksiModel extends Model
     }
 
     /**
-     * Hitung Total Pendapatan Harian Per Area
-     * Digunakan untuk tabel rekap kecil di Laporan Harian
+     2. REKAP HARIAN PER AREA
+     Dipanggil oleh Laporan.php:
+        $this->transaksiModel->getRekapHarianPerArea($area_pilih)
+     
+     Fungsi:
+     - Menghitung total pendapatan harian menggunakan SUM(bayar)
+     - Ditampilkan pada kotak "Rekap Harian" di halaman laporan
      */
     public function getRekapHarianPerArea($area_filter = null)
     {
@@ -60,20 +80,28 @@ class TransaksiModel extends Model
                         ->where('status_transaksi', 'selesai')
                         ->where('tanggal_transaksi', date('Y-m-d'));
 
+        // Area disesuaikan dengan filter dari Laporan.php
         if (!empty($area_filter)) {
             $builder->where('transaksi.id_area', $area_filter);
         }
 
+        // Group by area untuk mendapatkan total per area
         return $builder->groupBy('transaksi.id_area')->findAll();
     }
     
     /**
-     * 2. Laporan Bulanan (Menerima Parameter Bulan & Tahun)
-     * Mengelompokkan pendapatan berdasarkan tanggal dan area
+     3. LAPORAN BULANAN
+     Dipanggil oleh Laporan.php:
+        $this->transaksiModel->getLaporanBulanan($bulan, $tahun, $area)
+     
+     Fungsi:
+     - Mengolah data laporan berdasarkan bulan & tahun yang dipilih user
+     - Digunakan di bagian "Laporan Bulanan" pada halaman laporan
+     - Melakukan perhitungan pendapatan menggunakan SUM
      */
     public function getLaporanBulanan($bulan = null, $tahun = null, $area_filter = null)
     {
-        // Set default ke bulan/tahun sekarang jika parameter kosong
+        // Jika Laporan.php tidak mengirim bulan/tahun, pakai bulan sekarang
         $bulan = empty($bulan) ? date('m') : $bulan;
         $tahun = empty($tahun) ? date('Y') : $tahun;
 
@@ -83,43 +111,55 @@ class TransaksiModel extends Model
                         ->where('MONTH(tanggal_transaksi)', $bulan)
                         ->where('YEAR(tanggal_transaksi)', $tahun);
 
+        // Filter area berdasarkan pilihan dropdown di Laporan.php
         if (!empty($area_filter)) {
             $builder->where('transaksi.id_area', $area_filter);
         }
 
-        // Group by area agar muncul per area pendapatannya
         return $builder->groupBy('transaksi.id_area')->findAll();
     }
 
     /**
-     * 3. Hitung TOTAL UANG (Pendapatan) BULAN INI
-     * Mengembalikan satu angka total (integer)
+     4. TOTAL PENDAPATAN BULANAN
+     Dipanggil oleh Laporan.php:
+        $this->transaksiModel->getTotalPendapatanBulanIni($bulan, $tahun, $area)
+     
+     Fungsi:
+     - Menghasilkan satu angka total pendapatan bulan tersebut
+     - Ditampilkan di bagian "Total Pendapatan Bulan Ini" pada Laporan.php
      */
     public function getTotalPendapatanBulanIni($bulan = null, $tahun = null, $area_filter = null)
     {
         $bulan = empty($bulan) ? date('m') : $bulan;
         $tahun = empty($tahun) ? date('Y') : $tahun;
 
-        $builder = $this->selectSum('bayar') 
+        $builder = $this->selectSum('bayar')
                         ->where('status_transaksi', 'selesai')
                         ->where('MONTH(tanggal_transaksi)', $bulan)
                         ->where('YEAR(tanggal_transaksi)', $tahun);
 
+        // Filter area sesuai pilihan user
         if (!empty($area_filter)) {
             $builder->where('transaksi.id_area', $area_filter);
         }
 
         $query = $builder->first();
-        return $query['bayar'] ?? 0; 
+        return $query['bayar'] ?? 0;     // Jika null, kembalikan angka 0
     }
 
-    // =================================================================
-    // METHOD UNTUK FITUR HISTORY (ARSIP)
-    // =================================================================
+    // =======================================================================
+    // METHOD KHUSUS UNTUK FITUR HISTORY (dipanggil oleh Laporan.php->history)
+    // =======================================================================
 
     /**
-     * Mengambil detail riwayat transaksi berdasarkan Bulan & Tahun
-     * Termasuk Join ke tabel Area, Pengguna, Kendaraan, dan Petugas
+     5. HISTORY TRANSAKSI (ARSIP)
+     Dipanggil oleh Laporan.php:
+        $this->transaksiModel->getHistoryData($bulan, $tahun, $area)
+    
+     Fungsi:
+     - Mengambil semua transaksi masa lalu
+     - Menampilkan detail lengkap: plat, jenis kendaraan, area, petugas, dll
+     - Digunakan untuk halaman "History Transaksi"
      */
     public function getHistoryData($bulan = null, $tahun = null)
     {
@@ -127,24 +167,13 @@ class TransaksiModel extends Model
         $tahun = $tahun ?? date('Y');
 
         return $this->select('transaksi.*, pengguna.plat_nomor, kendaraan.jenis_kendaraan, petugas.nama as nama_petugas, area_parkir.nama_area')
-                    // Join ke tabel Pengguna untuk ambil Plat Nomor
                     ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna', 'left')
-                    
-                    // Join ke tabel Kendaraan untuk ambil Jenis (Mobil/Motor)
                     ->join('kendaraan', 'kendaraan.id_kendaraan = transaksi.id_kendaraan', 'left')
-                    
-                    // Join ke tabel Petugas untuk ambil Nama Petugas
                     ->join('petugas', 'petugas.id_petugas = transaksi.id_petugas', 'left')
-                    
-                    // Join ke tabel Area Parkir untuk ambil Nama Area (UPDATE BARU)
                     ->join('area_parkir', 'area_parkir.id_area = transaksi.id_area', 'left')
-                    
-                    // Filter Status Selesai & Sesuai Bulan/Tahun
                     ->where('status_transaksi', 'selesai')
                     ->where('MONTH(tanggal_transaksi)', $bulan)
                     ->where('YEAR(tanggal_transaksi)', $tahun)
-                    
-                    // Urutkan dari yang paling baru keluar
                     ->orderBy('waktu_keluar', 'DESC')
                     ->findAll();
     }
