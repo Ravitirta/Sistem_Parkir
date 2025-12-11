@@ -8,7 +8,7 @@ class Pelanggaran extends BaseController
     // 1. HALAMAN UTAMA (Daftar Pelanggaran Valid)
     public function index()
     {
-        // Panggil Model (Pastikan sudah buat PelanggaranModel.php juga)
+        // Panggil Model (Pastikan sudah membuat PelanggaranModel.php)
         $model = new PelanggaranModel();
         
         $data = [
@@ -42,9 +42,9 @@ class Pelanggaran extends BaseController
         
         // Cek validitas file
         if ($fileFoto->isValid() && ! $fileFoto->hasMoved()) {
-            // Generate nama unik (random) agar tidak bentrok
+            // Generate nama unik (random) supaya tidak bentrok
             $namaFoto = $fileFoto->getRandomName();
-            // Pindahkan file ke folder 'public/uploads'
+            // Pindahkan file ke folder 'public/uploads/'
             $fileFoto->move('uploads', $namaFoto);
         } else {
             return redirect()->back()->with('gagal', 'Gagal upload gambar.');
@@ -56,7 +56,7 @@ class Pelanggaran extends BaseController
             'id_area'    => $this->request->getPost('id_area'),
             'keterangan' => $this->request->getPost('keterangan'),
             'foto'       => $namaFoto,
-            'status'     => 'pending' // Default pending (tunggu admin)
+            'status'     => 'pending' // Default pending (tunggu admin untuk verifikasi)
         ]);
 
         return redirect()->to('/pelanggaran')->with('sukses', 'Laporan berhasil dikirim! Menunggu verifikasi petugas.');
@@ -97,7 +97,7 @@ class Pelanggaran extends BaseController
     // 6. FUNGSI HAPUS (Hapus Data Database & File Gambar)
     public function hapus($id)
     {
-        // Security: Cek Login
+        // Security untuk Cek Login
         if(!session()->get('logged_in')){ 
             return redirect()->to('/auth'); 
         }
@@ -109,7 +109,7 @@ class Pelanggaran extends BaseController
 
         if ($laporan) {
             // B. Hapus File Gambar Fisik di folder 'uploads'
-            // Melakukan pengecekan apakah filenya ada agar tidak error
+            // Melakukan pengecekan apakah filenya sudah ada atau belum supaya tidak error
             $pathGambar = 'uploads/' . $laporan['foto'];
             
             if (file_exists($pathGambar)) {
