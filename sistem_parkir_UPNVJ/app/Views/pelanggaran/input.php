@@ -6,12 +6,12 @@
         
         <div class="mb-3">
             <label>Tanggal Kejadian</label>
-            <input type="date" name="tanggal" class="form-control" required>
+            <input type="date" name="tanggal" class="form-control">
         </div>
 
         <div class="mb-3">
             <label>Area Parkir</label>
-            <select name="id_area" class="form-select" required>
+            <select name="id_area" class="form-select">
                 <?php foreach($area as $a): ?>
                     <option value="<?= $a['id_area']; ?>"><?= $a['nama_area']; ?></option>
                 <?php endforeach; ?>
@@ -20,7 +20,7 @@
 
         <div class="mb-3">
             <label>Bukti Foto</label>
-            <input type="file" name="foto" class="form-control" accept="image/*" required>
+            <input type="file" name="foto" class="form-control" accept="image/*">
         </div>
 
         <div class="mb-3">
