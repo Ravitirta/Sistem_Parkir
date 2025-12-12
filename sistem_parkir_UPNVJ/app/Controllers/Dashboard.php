@@ -15,19 +15,16 @@ class Dashboard extends BaseController
         // Data yang dikirim ke View Wrapper
         $data = [
             'title'     => 'Transaksi Masuk',
-            // Pastikan Anda punya file app/Views/dashboard/transaksi_masuk.php
             'isi'       => 'dashboard/transaksi_masuk', 
             'area'      => $AreaModel->findAll(),
             'kendaraan' => $KendaraanModel->findAll(),
-            'petugas'   => session()->get() // Data sesi petugas
+            'petugas'   => session()->get()
         ];
 
         return view('layout/wrapper', $data);
     }
 
-    /**
-     * Fungsi Helper untuk membuat ID otomatis (contoh: TR_001, PG_005)
-     */
+    
     private function buatKodeOtomatis($tabel, $kolom, $prefix)
     {
         $db = \Config\Database::connect();
@@ -36,7 +33,7 @@ class Dashboard extends BaseController
 
         if ($lastData) {
             $lastId = $lastData->$kolom; 
-            // Ambil angka dari string (misal TR_001 -> ambil 001 jadi integer 1)
+            // Ambil TR_001 -> ambil 001 jadi integer 1
             $number = intval(substr($lastId, 3)); 
             $newNumber = $number + 1; 
         } else {
@@ -47,13 +44,10 @@ class Dashboard extends BaseController
         return $prefix . str_pad($newNumber, 3, "0", STR_PAD_LEFT); 
     }
 
-    /**
-     * Proses Simpan Transaksi Masuk
-     */
     public function simpanMasuk()
     {
         $transaksiModel = new TransaksiModel();
-        $statusAreaModel = new StatusAreaModel(); // Panggil model status
+        $statusAreaModel = new StatusAreaModel(); 
         $db = \Config\Database::connect();
         $session = session();
 
@@ -62,11 +56,11 @@ class Dashboard extends BaseController
         $id_area = $this->request->getPost('id_area'); 
         $id_kendaraan = $this->request->getPost('id_kendaraan');
 
-        // --- 1. VALIDASI: Cek apakah kendaraan masih ada di dalam (belum checkout)? ---
+        // Cek apakah kendaraan masih ada di dalam
         $cekDuplikat = $db->table('transaksi')
                           ->join('pengguna', 'pengguna.id_pengguna = transaksi.id_pengguna')
                           ->where('pengguna.plat_nomor', $plat_nomor)
-                          ->where('transaksi.waktu_keluar', null) // Waktu keluar NULL berarti masih parkir
+                          ->where('transaksi.waktu_keluar', null) 
                           ->countAllResults();
 
         if ($cekDuplikat > 0) {
@@ -74,14 +68,13 @@ class Dashboard extends BaseController
             return redirect()->to('/dashboard');
         }
 
-        // --- 2. PERSIAPAN DATA ---
         $waktu_sekarang = date('H:i:s'); 
         $tanggal_sekarang = date('Y-m-d');
 
-        // A. Generate ID Transaksi Baru
+        // Generate ID Transaksi Baru
         $id_transaksi_baru = $this->buatKodeOtomatis('transaksi', 'id_transaksi', 'TR_');
 
-        // B. Cek Data Pengguna (Apakah Plat Nomor Baru atau Lama?)
+        // Cek Data Pengguna (Apakah Plat Nomor Baru atau Lama?)
         $cekPengguna = $db->table('pengguna')->where('plat_nomor', $plat_nomor)->get()->getRow();
 
         if ($cekPengguna) {
@@ -98,12 +91,12 @@ class Dashboard extends BaseController
             $id_pengguna_fix = $id_pengguna_baru;
         }
 
-        // --- 3. SIMPAN KE TABEL TRANSAKSI ---
+        // SIMPAN KE TABEL TRANSAKSI
         $dataTransaksi = [
             'id_transaksi'      => $id_transaksi_baru, 
             'tanggal_transaksi' => $tanggal_sekarang,
             'waktu_masuk'       => $waktu_sekarang,
-            'waktu_keluar'      => null, // Masih null karena baru masuk
+            'waktu_keluar'      => null, 
             'id_area'           => $id_area,
             'id_pengguna'       => $id_pengguna_fix,
             'id_kendaraan'      => $id_kendaraan,
@@ -116,7 +109,7 @@ class Dashboard extends BaseController
 
 
 
-        // --- 4. UPDATE LOG STATUS & HISTORY AREA ---
+        // UPDATE LOG STATUS & HISTORY AREA 
         
         $id_area = $this->request->getPost('id_area');
         
@@ -129,7 +122,6 @@ class Dashboard extends BaseController
         // Eksekusi Query
         $db->query($sql, [$waktu_sekarang, $id_area]);
 
-        // 6. Redirect kembali
         $session->setFlashdata('berhasil', 'Kendaraan berhasil masuk.');
         return redirect()->to('/dashboard');
     }
